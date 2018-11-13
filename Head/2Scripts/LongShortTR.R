@@ -4,7 +4,7 @@ library(gdata)
 
 GenLength <- read.xls("../../Body/1Row/GenerationLengthForMammals")
 CHOR = read.table('../../Body/2Derived/MitGenomics.txt', header = TRUE, sep='\t')
-tr = read.table('../../Body/1Row/TRFinder.txt', sep='\t', header = TRUE)
+tr = read.table('../../Body/2Derived/TRFinder.txt', sep='\t', header = TRUE)
 
 GenLength$Species = gsub(' ','_',GenLength$Scientific_name)
 GenLength = GenLength[,c(14,16)]
