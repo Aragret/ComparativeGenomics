@@ -2,7 +2,7 @@ rm(list=ls(all=TRUE))  # remove everything from R memory (old variables, dataset
 
 library(gdata)
 
-GenLength <- read.xls("../../Body/1Row/GenerationLengthForMammals")
+GenLength <- read.xls("../../Body/1Raw/GenerationLengthForMammals.xlsx")
 CHOR = read.table('../../Body/2Derived/MitGenomics.txt', header = TRUE, sep='\t')
 tr = read.table('../../Body/2Derived/TRFinder.txt', sep='\t', header = TRUE)
 
@@ -139,6 +139,10 @@ LongTrLengthGL = merge(LongTrLength, GenLength, by.x='species', by.y = 'Species'
 
 cor.test(ShortTrLengthGL$LengthOfTandemRepeats, ShortTrLengthGL$GenerationLength_d, method='spearman')
 cor.test(LongTrLengthGL$LengthOfTandemRepeats, LongTrLengthGL$GenerationLength_d, method='spearman')
+
+pdf('../../Body/4Figures/LongShortTR.pdf')
+plot(LongTrLengthGL$LengthOfTandemRepeats, LongTrLengthGL$GenerationLength_d)
+dev.off()
 
 ### without overlaps in species
 
