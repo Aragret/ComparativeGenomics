@@ -1,6 +1,8 @@
+### correlation of length of TR versus GT in mammals
+
 rm(list=ls(all=TRUE))  # remove everything from R memory (old variables, datasets...) 
 
-library(gdata)
+library(gdata) # install.packages("gdata")
 
 GenLength <- read.xls("../../Body/1Raw/GenerationLengthForMammals.xlsx")
 CHOR = read.table('../../Body/2Derived/MitGenomics.txt', header = TRUE, sep='\t')
@@ -9,11 +11,21 @@ tr = read.table('../../Body/2Derived/TRFinder.txt', sep='\t', header = TRUE)
 GenLength$Species = gsub(' ','_',GenLength$Scientific_name)
 GenLength = GenLength[,c(14,16)]
 
+### get average for species with several lines !!
+length(GenLength$Species)         
+length(unique(GenLength$Species))
+VecOfMammalianSpecies = unique(GenLength$Species)
+
+### keep only mammals
+nrow(tr)
+tr = tr[tr$Species %in% VecOfMammalianSpecies,]
+nrow(tr)
+length(unique(tr$Species))  # 434 mammalian species
+
 tr$FullLength = tr$End - tr$Start
-
 tr$ConsensusLength = as.numeric(lapply(as.character(tr$Consensus), nchar))
-
 summary(tr$ConsensusLength)
+hist(tr$ConsensusLength, breaks = 50)
 
 ShortTr = tr[tr$ConsensusLength < median(tr$ConsensusLength),]
 LongTr = tr[tr$ConsensusLength >= median(tr$ConsensusLength),]
@@ -33,15 +45,14 @@ for(i in unique(ShortTr$Species)){
 
 ShortRepNumber = as.data.frame(ShortRepNumber)
 names(ShortRepNumber) = c('Species', 'RepNumber')
-
-summary(ShortRepNumber$RepNumber)
+str(ShortRepNumber)
+summary(as.numeric(ShortRepNumber$RepNumber))
 
 ShortTrGl = merge(ShortRepNumber, GenLength, by = 'Species')
 
-summary(ShortTrGl$RepNumber)
+summary(as.numeric(ShortTrGl$RepNumber))
 
 plot(ShortTrGl$RepNumber, ShortTrGl$GenerationLength_d)
-
 
 #### Long consensus length
 
@@ -67,8 +78,8 @@ length(intersect(ShortTrGl$Species, LongTrGl$Species)) # 175 sp with both long a
 cor.test(as.numeric(ShortTrGl$RepNumber), ShortTrGl$GenerationLength_d, method = 'spearman')
 cor.test(as.numeric(LongTrGl$RepNumber), LongTrGl$GenerationLength_d, method = 'spearman')
 
-
-data = merge(ShortTrGl, LongTrGl, by='Species')
+data = merge(ShortTrGl, LongTrGl, by='Species')  ## merge two datasets (all = TRUE) and run: GL ~ shortTR + longTR, zeroes
+# data1 = merge(ShortTrGl, LongTrGl, all = TRUE, by='Species') 
 
 setdiff(ShortTrGl$Species, LongTrGl$Species)
 setdiff(LongTrGl$Species, ShortTrGl$Species)
@@ -142,6 +153,7 @@ cor.test(LongTrLengthGL$LengthOfTandemRepeats, LongTrLengthGL$GenerationLength_d
 
 pdf('../../Body/4Figures/LongShortTR.pdf')
 plot(LongTrLengthGL$LengthOfTandemRepeats, LongTrLengthGL$GenerationLength_d)
+plot(log2(LongTrLengthGL$LengthOfTandemRepeats), log2(LongTrLengthGL$GenerationLength_d))
 dev.off()
 
 ### without overlaps in species
