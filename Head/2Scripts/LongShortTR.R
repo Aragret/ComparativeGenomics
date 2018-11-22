@@ -1,6 +1,8 @@
-### correlation of length of TR versus GT in mammals
+### correlation of TR length and GT in mammals
 
 rm(list=ls(all=TRUE))  # remove everything from R memory (old variables, datasets...) 
+
+pdf("../../Body/4Figures/LongShortTR.R.o1.pdf")
 
 library(gdata) # install.packages("gdata")
 
@@ -11,175 +13,37 @@ tr = read.table('../../Body/2Derived/TRFinder.txt', sep='\t', header = TRUE)
 GenLength$Species = gsub(' ','_',GenLength$Scientific_name)
 GenLength = GenLength[,c(14,16)]
 
-### get average for species with several lines !!
-length(GenLength$Species)         
-length(unique(GenLength$Species))
-VecOfMammalianSpecies = unique(GenLength$Species)
-
-### keep only mammals
-nrow(tr)
-tr = tr[tr$Species %in% VecOfMammalianSpecies,]
-nrow(tr)
-length(unique(tr$Species))  # 434 mammalian species
-
+### get average for species with several lines in GL!!
+tr = tr[tr$Species %in% GenLength$Species,]
 tr$FullLength = tr$End - tr$Start
 tr$ConsensusLength = as.numeric(lapply(as.character(tr$Consensus), nchar))
-summary(tr$ConsensusLength)
-hist(tr$ConsensusLength, breaks = 50)
 
-ShortTr = tr[tr$ConsensusLength < median(tr$ConsensusLength),]
-LongTr = tr[tr$ConsensusLength >= median(tr$ConsensusLength),]
+par(mfrow=c(2,2))
+hist(tr$ConsensusLength, breaks = 50, main = 'majority of TRs has short consensus')
+hist(tr$CopyNumber, breaks = 50, main = 'majority of TRs are low-copied')
+plot(tr$ConsensusLength,tr$CopyNumber, main = paste('TRs with long consensus are less-copied','than TRs with short consensus', sep = '\n'))
+plot(tr$ConsensusLength,tr$FullLength) # there is a separate spot!!! who they are?
 
-# calculate number of repeats
+par(mfrow=c(1,1))
 
-#### Short consensus length
+hist(tr$FullLength, breaks = 50)
+tr$number = 1; 
 
-length(unique(ShortTr$Species))
-length(unique(LongTr$Species))
+All = aggregate(list(tr$number,tr$FullLength), by = list(tr$Species), FUN = sum)
+names(All) = c('Species','NumberOfAllTR','TotalLengthOfAllTR')
+All = merge(All,GenLength)
+All = All[All$TotalLengthOfAllTR > 0,]
+plot(All$GenerationLength_d,All$TotalLengthOfAllTR,xlim = c(0,10500), ylim = c(0,2000)) # triangle => maybe fisher test?
 
-ShortRepNumber = c()
-for(i in unique(ShortTr$Species)){
-  a = nrow(ShortTr[ShortTr$Species == i,])
-  ShortRepNumber = rbind(ShortRepNumber, c(as.character(i), a))
+for (threshold in 1:9)
+{ # threshold = 1
+LongTr = tr[tr$ConsensusLength >= quantile(tr$ConsensusLength,threshold/10),]; 
+LongAGG = aggregate(list(LongTr$number,LongTr$FullLength), by = list(LongTr$Species), FUN = sum)
+names(LongAGG) = c('Species','NumberOfLongTR','TotalLengthOfLongTR')
+Long = merge(LongAGG,GenLength)
+Long = Long[Long$TotalLengthOfLongTR > 0,]
+title = paste('length of TR >= ',threshold/10, ' percentile')
+plot(Long$GenerationLength_d,Long$TotalLengthOfLongTR, main = title, ylim = c(0,2000), xlim = c(0,10500)) # triangle => maybe fisher test?
 }
 
-ShortRepNumber = as.data.frame(ShortRepNumber)
-names(ShortRepNumber) = c('Species', 'RepNumber')
-str(ShortRepNumber)
-summary(as.numeric(ShortRepNumber$RepNumber))
-
-ShortTrGl = merge(ShortRepNumber, GenLength, by = 'Species')
-
-summary(as.numeric(ShortTrGl$RepNumber))
-
-plot(ShortTrGl$RepNumber, ShortTrGl$GenerationLength_d)
-
-#### Long consensus length
-
-LongRepNumber = c()
-for(i in unique(LongTr$Species)){
-  a = nrow(LongTr[LongTr$Species == i,])
-  LongRepNumber = rbind(LongRepNumber, c(as.character(i), a))
-}
-
-LongRepNumber = as.data.frame(LongRepNumber)
-names(LongRepNumber) = c('Species', 'RepNumber')
-
-summary(LongRepNumber$RepNumber)
-
-LongTrGl = merge(LongRepNumber, GenLength, by = 'Species')
-
-summary(LongTrGl$RepNumber)
-
-plot(LongTrGl$RepNumber, LongTrGl$GenerationLength_d)
-
-length(intersect(ShortTrGl$Species, LongTrGl$Species)) # 175 sp with both long and short repeats
-
-cor.test(as.numeric(ShortTrGl$RepNumber), ShortTrGl$GenerationLength_d, method = 'spearman')
-cor.test(as.numeric(LongTrGl$RepNumber), LongTrGl$GenerationLength_d, method = 'spearman')
-
-data = merge(ShortTrGl, LongTrGl, by='Species')  ## merge two datasets (all = TRUE) and run: GL ~ shortTR + longTR, zeroes
-# data1 = merge(ShortTrGl, LongTrGl, all = TRUE, by='Species') 
-
-setdiff(ShortTrGl$Species, LongTrGl$Species)
-setdiff(LongTrGl$Species, ShortTrGl$Species)
-
-OnlyShort = ShortTrGl[which(as.character(ShortTrGl$Species) %in% setdiff(ShortTrGl$Species, LongTrGl$Species)),]
-OnlyLong = LongTrGl[which(as.character(LongTrGl$Species) %in% setdiff(LongTrGl$Species, ShortTrGl$Species)),]
-
-plot(OnlyLong$RepNumber, OnlyLong$GenerationLength_d)
-plot(OnlyShort$RepNumber, OnlyShort$GenerationLength_d)
-
-for(i in 1:nrow(OnlyLong)){
-  OnlyLong$ShortOrLong[i] = 1
-}
-
-for(i in 1:nrow(OnlyShort)){
-  OnlyShort$ShortOrLong[i] = 0
-}
-
-ShortLongTr = rbind(OnlyShort, OnlyLong)
-
-cor.test(as.numeric(OnlyShort$RepNumber), OnlyShort$GenerationLength_d, method = 'spearman')
-cor.test(as.numeric(OnlyLong$RepNumber), OnlyLong$GenerationLength_d, method = 'spearman')
-
-
-#######################################################################################################
-### repeats length
-
-VEC = unique(ShortTr$Species); length(VEC)
-for (i in 1:length(VEC))
-{  # i = 1
-  species = VEC[i];
-  TEMP = ShortTr[ShortTr$Species == species,]
-  vec_all = c(1); vec_all = vec_all[-1];
-  NumberOfTandemRepeats = nrow(TEMP);
-  for (j in 1:nrow(TEMP))
-  {
-    vec = seq(TEMP$Start[j],TEMP$End[j],1);
-    vec_all = c(vec_all,vec)
-  }
-  LengthOfTandemRepeats = length(vec_all); vec_all = unique(vec_all); LengthOfTandemRepeatsWithoutOverlaps = length(vec_all);
-  result_line = data.frame(species, NumberOfTandemRepeats, LengthOfTandemRepeats, LengthOfTandemRepeatsWithoutOverlaps)
-  if (i == 1) {ShortTrLength = result_line}
-  if (i >  1) {ShortTrLength = rbind(ShortTrLength, result_line)}
-}
-
-VEC = unique(LongTr$Species); length(VEC)
-for (i in 1:length(VEC))
-{  # i = 1
-  species = VEC[i];
-  TEMP = LongTr[LongTr$Species == species,]
-  vec_all = c(1); vec_all = vec_all[-1];
-  NumberOfTandemRepeats = nrow(TEMP);
-  for (j in 1:nrow(TEMP))
-  {
-    vec = seq(TEMP$Start[j],TEMP$End[j],1);
-    vec_all = c(vec_all,vec)
-  }
-  LengthOfTandemRepeats = length(vec_all); vec_all = unique(vec_all); LengthOfTandemRepeatsWithoutOverlaps = length(vec_all);
-  result_line = data.frame(species, NumberOfTandemRepeats, LengthOfTandemRepeats, LengthOfTandemRepeatsWithoutOverlaps)
-  if (i == 1) {LongTrLength = result_line}
-  if (i >  1) {LongTrLength = rbind(LongTrLength, result_line)}
-}
-
-### merge with GL
-
-ShortTrLengthGL = merge(ShortTrLength, GenLength, by.x='species', by.y = 'Species')
-LongTrLengthGL = merge(LongTrLength, GenLength, by.x='species', by.y = 'Species')
-
-cor.test(ShortTrLengthGL$LengthOfTandemRepeats, ShortTrLengthGL$GenerationLength_d, method='spearman')
-cor.test(LongTrLengthGL$LengthOfTandemRepeats, LongTrLengthGL$GenerationLength_d, method='spearman')
-
-pdf('../../Body/4Figures/LongShortTR.pdf')
-plot(LongTrLengthGL$LengthOfTandemRepeats, LongTrLengthGL$GenerationLength_d)
-plot(log2(LongTrLengthGL$LengthOfTandemRepeats), log2(LongTrLengthGL$GenerationLength_d))
 dev.off()
-
-### without overlaps in species
-
-data = merge(ShortTrLengthGL, LongTrLengthGL, by='species')
-
-setdiff(ShortTrLengthGL$species, LongTrLengthGL$species)
-setdiff(LongTrLengthGL$species, ShortTrLengthGL$species)
-
-OnlyShortLength = ShortTrLengthGL[which(as.character(ShortTrLengthGL$species) %in% setdiff(ShortTrLengthGL$species, LongTrLengthGL$species)),]
-OnlyLongLength = LongTrLengthGL[which(as.character(LongTrLengthGL$species) %in% setdiff(LongTrLengthGL$species, ShortTrLengthGL$species)),]
-
-plot(OnlyLongLength$LengthOfTandemRepeats, OnlyLongLength$GenerationLength_d)
-plot(OnlyShortLength$LengthOfTandemRepeats, OnlyShortLength$GenerationLength_d)
-
-for(i in 1:nrow(OnlyLong)){
-  OnlyLong$ShortOrLong[i] = 1
-}
-
-for(i in 1:nrow(OnlyShort)){
-  OnlyShort$ShortOrLong[i] = 0
-}
-
-ShortLongTr = rbind(OnlyShort, OnlyLong)
-
-cor.test(as.numeric(OnlyShortLength$LengthOfTandemRepeats), OnlyShortLength$GenerationLength_d, method = 'spearman')
-cor.test(as.numeric(OnlyLongLength$LengthOfTandemRepeats), OnlyLongLength$GenerationLength_d, method = 'spearman')
-
-plot(LongTrLengthGL$LengthOfTandemRepeats, LongTrLengthGL$GenerationLength_d)
