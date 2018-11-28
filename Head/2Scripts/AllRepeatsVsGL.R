@@ -5,6 +5,7 @@ CHOR = read.table('../../Body/2Derived/MitGenomics.txt', header=TRUE, sep='\t')
 summary(lm(CHOR$GenomeLength ~ CHOR$REP.LengthOfTandemRepeats + CHOR$REP.DirRepLength +
              CHOR$REP.SymmRepLength + CHOR$REP.ComplRepLength + CHOR$REP.InvRepLength))
 
+### KP: IF WE DO IT (all analyses) CLASS BY CLASS - which results are stable?
 #Coefficients:
 #  Estimate Std. Error  t value Pr(>|t|)    
 #(Intercept)                     1.660e+04  1.344e+01 1235.445  < 2e-16 ***
@@ -25,6 +26,8 @@ CHOR$DirRepCoverage = CHOR$REP.DirRepLength / CHOR$GenomeLength
 CHOR$SymmRepCoverage = CHOR$REP.SymmRepLength / CHOR$GenomeLength
 CHOR$ComplRepCoverage = CHOR$REP.ComplRepLength / CHOR$GenomeLength
 CHOR$InvRepCoverage = CHOR$REP.InvRepLength / CHOR$GenomeLength
+
+### KP: if we plot hist(REPEATCoverage) - do we see, that TR and diret are more abundant - have higher percent?
 
 summary(lm(scale(CHOR$GenomeLength) ~ scale(CHOR$TRCoverage) + scale(CHOR$DirRepCoverage) + scale(CHOR$SymmRepCoverage) +
              scale(CHOR$ComplRepCoverage) + scale(CHOR$InvRepCoverage)))
@@ -66,6 +69,8 @@ for (i in 1:length(VEC))
 }
 
 data = merge(CHOR, FINAL, by='Species')
+## KP: as I understand after this merging we loose all species without perfect TR and statistics is decreasing significatly.
+## try to use all.x = TRUE and substitute NA by zero => run statistics so, that number of analyzed species is the same
 
 ### repeats coverage
 
