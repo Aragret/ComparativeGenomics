@@ -40,4 +40,13 @@ Mammalia = Final[Final$TAXON == 'Mammalia',] # 731
 Aves = Final[Final$TAXON == 'Aves',] # 180
 
 #### write to fasta
-write.fasta()
+
+for(i in unique(Final$Gene)){
+  for(j in unique(Final$TAXON)){
+    GeneTable = Final[Final$Gene == i,]
+    GeneTaxonTable = GeneTable[GeneTable$TAXON == j,]
+    write.fasta(as.list(GeneTaxonTable$ModifiedAmino), GeneTaxonTable$Species, sprintf('../../Body/2Derived/ForAlign/%s_%s.fna', i, j),
+                open = 'w')
+  }
+}
+
