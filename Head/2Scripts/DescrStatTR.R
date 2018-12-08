@@ -40,5 +40,4 @@ agg2 = aggregate(. ~ Species, mean, data = tr[, c('Species', 'CopyNumber', 'Perc
 
 data = merge(agg, agg2, by='Species')
 
-data = merge(data, CHOR[, c('Species', 'GenomeLength', 'A', 'T', 'G', 'C', 'TAXON', 'taxonomy')],
-             by = 'Species')
+# create conflict
