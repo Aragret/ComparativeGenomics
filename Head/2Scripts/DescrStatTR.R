@@ -42,3 +42,5 @@ data = merge(agg, agg2, by='Species')
 
 data = merge(data, CHOR[, c('Species', 'GenomeLength', 'A', 'T', 'G', 'C', 'TAXON', 'taxonomy')],
              by = 'Species')
+
+write.table(data, '../../Body/2Derived/TandRepTable.txt', sep='\t')
