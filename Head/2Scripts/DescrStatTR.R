@@ -2,7 +2,7 @@ rm(list=ls(all=TRUE))  # remove everything from R memory (old variables, dataset
 
 tr = read.table('../../Body/2Derived/TRFinder.txt', header=TRUE, sep='\t')
 CHOR = read.table('../../Body/2Derived/MitGenomics.txt', header = TRUE, sep='\t')
-neutr_nuc = read.table('../../Body/2Derived/AllGenesCodonUsage.txt', header=TRUE, sep='\t')
+neutr_nuc = read.table('../../Body/2Derived/AllGenesCodonUsageNoOverlap.txt', header=TRUE, sep='\t')
 
 tr$FullLength = tr$End - tr$Start
 tr$ConsensusLength = as.numeric(lapply(as.character(tr$Consensus), nchar))
@@ -43,4 +43,4 @@ data = merge(data, agg_neutr, by='Species')
 data = merge(data, CHOR[, c('Species', 'GenomeLength', 'A', 'T', 'G', 'C', 'TAXON', 'taxonomy')],
              by = 'Species')
 
-write.table(data, '../../Body/2Derived/TandRepTable.txt', sep='\t')
+write.table(data, '../../Body/3Results/TandRepInfo.txt', sep='\t')
