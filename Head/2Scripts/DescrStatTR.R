@@ -30,15 +30,9 @@ for(i in 1:nrow(tr)){
 
 tr$Number = 1
 
-agg = aggregate(. ~ Species, sum, data=tr[, c('Species', 'FullLength', 'ConsensusLength', 'fr_A_cons', 'fr_T_cons', 'fr_G_cons',
-                                              'fr_C_cons', 'fr_A_repeat', 'fr_T_repeat', 'fr_G_repeat', 'fr_C_repeat', 'Number')])
-
-agg2 = aggregate(. ~ Species, mean, data = tr[, c('Species', 'CopyNumber', 'PercentMatches')])
-
 agg_neutr = aggregate(. ~ Species, sum, data=neutr_nuc[, c('Species', 'NeutralA', 'NeutralT',
                                                            'NeutralG', 'NeutralC')])
-data = merge(agg, agg2, by='Species')
-data = merge(data, agg_neutr, by='Species')
+data = merge(tr, agg_neutr, by='Species', all.x=TRUE)
 
 data = merge(data, CHOR[, c('Species', 'GenomeLength', 'A', 'T', 'G', 'C', 'TAXON', 'taxonomy')],
              by = 'Species')
