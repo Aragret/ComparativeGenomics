@@ -37,4 +37,4 @@ data = merge(tr, agg_neutr, by='Species', all.x=TRUE)
 data = merge(data, CHOR[, c('Species', 'GenomeLength', 'A', 'T', 'G', 'C', 'TAXON', 'taxonomy')],
              by = 'Species')
 
-write.table(data, '../../Body/3Results/TandRepInfo.txt', sep='\t')
+write.table(data, '../../Body/3Results/TandRepInfo.txt', sep='\t', quote=FALSE, row.names=FALSE)
