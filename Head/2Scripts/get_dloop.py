@@ -4,52 +4,67 @@ import sys
 import os
 
 """
-	This script extracts all annotated dloops from the files you explicitly hand it as an argument. You can either hand it a single genbank file or a whole folder, containing several such files.
-	
-	usage: python get_dloop.py [input_file_or_dir] [output_file]
+Notes:
+D-loop same as Control region запись вида 
+
+D-loop          15665..16724
+                     /note="control region"
 """
 
-# Working function
-def get_dloop(filename):
-	"""
-		This function accepts a genbank file, parsesit, extracts the dloop and returns it as a string of type >name_coords newline sequence
-	"""
-	dloops = ""
-	for rec in SeqIO.parse(filename, 'genbank'):
-		species = "_".join(rec.annotations['organism'].split())
-		for feature in rec.features:
-			if feature.type == "D-loop":
-				dloop = (">" + "\t".join([species, str(feature.location)]) + "\n" + str(feature.extract(rec.seq)) + "\n")
-				dloops += dloop
-	return dloops
+outfile = open("/Users/xtinaushakova/WB/tRNA/mito-trna/dloops_control_regions.txt", "wt")
+out_stats = open("/Users/xtinaushakova/WB/tRNA/mito-trna/dloop_stats.txt", "wt")
 
-#
-if len(sys.argv) > 3:
-	sys.exit("Too many arguments! Check the doc string for usage info.")
-elif len(sys.argv) < 2:
-	sys.exit("No input file or dir provided! Check the doc string for usage info.")
+out_stats_header = "\t".join([
+	"Species", 
+	"D-loop count", 
+	"Control region count", 
+	"Notes"])
+out_stats.write(out_stats_header + "\n")
 
-user_input = sys.argv[1]
+outfile_header = "\t".join([
+	"Species", 
+	"Feature name", 
+	"Feature location", 
+	"Strand", 
+	"Sequence", 
+	"Notes"])
+outfile.write(outfile_header + "\n")
 
-# Check if user specified file or dir as input
-dloops = ""
-if os.path.isdir(user_input):
-	os.chdir(user_input)
-	#dloop list of lists
-	for filename in os.listdir(user_input):
-		dloops += get_dloop(user_input)
-	#	dloop = get_dloop(file)
-	#	outfile.write(dloop + "\n")
-#		print("Здесь мог бы быть ваш длуп")
-	#flatten list
-elif os.path.isfile(user_input):
-	dloops = get_dloop(user_input)
 
-# Check if output file specified
-if len(sys.argv) > 2:
-	user_output = sys.argv[2]
-	user_output = open(user_output, "wt")
-	user_output.write(dloops)
-	user_output.close()
-else:
-	print(dloops)
+infile = open("/Users/xtinaushakova/WB/tRNA/mito-trna/Body/1Raw/1Source_Genbank/source.gb")
+
+for rec in SeqIO.parse(infile, 'genbank'):
+	species = "_".join(rec.annotations['organism'].split())
+	control_count = 0
+	dloop_count = 0
+	same = 0
+	for feature in rec.features:
+		if feature.type == "D-loop":
+			dloop_sequence = str(feature.extract(rec.seq)).upper()
+			dloop_location = str(feature.location)
+			dloop_strand = str(feature.strand)
+			dloop_count += 1
+			outfile.write("\t".join([species, "dloop", dloop_location, dloop_strand, dloop_sequence, "", "\n"]))
+			if 'notes' in feature.qualifiers and "control region" in feature.qualifiers['note']:
+				control += 1
+				control_sequence = dloop_sequence
+				control_location = dloop_location
+				control_strand = dloop_strand
+				control_count += 1
+				same += 1
+				outfile.write("\t".join([species, "control region", control_location, control_strand, control_sequence, "control same as dloop", "\n"]))
+		if feature.type == "misc_feature" and 'note' in feature.qualifiers and "control region" in feature.qualifiers['note']:
+				control_sequence = str(feature.extract(rec.seq)).upper()
+				control_location = str(feature.location)
+				control_strand = str(feature.strand)
+				control_count += 1
+				outfile.write("\t".join([species, "control region", control_location, control_strand, control_sequence, "control annotated as misc_feature", "\n"]))	
+	out_stats.write("\t".join([species, str(dloop_count), str(control_count)]))
+	if same > 0:
+		out_stats.write("\t" + "control same as dloop" + "\n") 
+	else: 
+		out_stats.write("\t" + "" + "\n")
+
+infile.close()
+outfile.close()
+out_stats.close()
