@@ -17,12 +17,16 @@ hist(Dloops$Length, breaks = 50)
 
 data = merge(CHOR, Dloops[, c('Species', 'Length')])
 
-plot(data$GenomeLength, data$Length)
+for(taxon in unique(data$TAXON)){
+  temp_data = data[data$TAXON == taxon,]
+  a = cor.test(temp_data$GenomeLength, temp_data$Length)
+  plot(temp_data$GenomeLength, temp_data$Length, main = c(taxon, a$estimate))
+  print(c(taxon, cor.test(temp_data$GenomeLength, temp_data$Length)))
+}
 
-cor.test(data$GenomeLength, data$Length) # r = 0.6997531
+# cor.test(data$GenomeLength, data$Length) # r = 0.6997531
 
 dev.off()
-
 
 
 
