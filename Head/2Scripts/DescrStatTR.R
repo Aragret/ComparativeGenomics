@@ -1,8 +1,11 @@
 rm(list=ls(all=TRUE))  # remove everything from R memory (old variables, datasets...) 
 
+library(dplyr) # install.packages("dplyr")
+
 tr = read.table('../../Body/2Derived/TRFinder.txt', header=TRUE, sep='\t')
 CHOR = read.table('../../Body/2Derived/MitGenomics.txt', header = TRUE, sep='\t')
 neutr_nuc = read.table('../../Body/2Derived/AllGenesCodonUsageNoOverlap.txt', header=TRUE, sep='\t')
+dloops_tr = read.table('../../Body/2Derived/TRinDloops.txt', header=TRUE, sep='\t')
 
 tr$FullLength = tr$End - tr$Start
 tr$ConsensusLength = as.numeric(lapply(as.character(tr$Consensus), nchar))
@@ -37,4 +40,26 @@ data = merge(tr, agg_neutr, by='Species', all.x=TRUE)
 data = merge(data, CHOR[, c('Species', 'GenomeLength', 'A', 'T', 'G', 'C', 'TAXON', 'taxonomy')],
              by = 'Species')
 
-write.table(data, '../../Body/3Results/TandRepInfo.txt', sep='\t', quote=FALSE, row.names=FALSE)
+####### in CR or not
+dloops_tr$Species = sub('_dloop', '', dloops_tr$Species)
+dloops_tr$Species = sub('_control_region', '', dloops_tr$Species)
+
+
+temp_data = anti_join(tr, dloops_tr[, -c(2, 3)])
+
+nrow(anti_join(temp_data, dloops_tr[, -c(2, 3)]))
+nrow(anti_join(dloops_tr[, -c(2, 3)], temp_data))
+
+nrow(anti_join(temp_data, tr))
+nrow(anti_join(tr, temp_data))
+
+temp_data$InDloop = 0
+
+final = merge(tr, temp_data, all.x = TRUE)
+
+final[is.na(final$InDloop),]$InDloop = 1
+
+final = merge(final, CHOR[, c('Species', 'GenomeLength', 'A', 'T', 'G', 'C', 'TAXON', 'taxonomy')],
+              by = 'Species')
+
+write.table(final, '../../Body/3Results/TandRepInfo.txt', sep='\t', quote=FALSE, row.names=FALSE)
