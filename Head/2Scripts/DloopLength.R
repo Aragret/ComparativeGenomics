@@ -69,6 +69,6 @@ names(AGG) = c('Species', 'DloopsLength')
 one_sp_one_cr = merge(data[, c('Species', 'TAXON', 'GenomeLength', 'ECO.Maximum.longevity..yrs.')], AGG, by='Species')
 
 ggplot(one_sp_one_cr, aes(DloopsLength, GenomeLength, col=TAXON)) +
-  geom_point() + xlab('D-loops length') + title('Sum of multiple dloops')
+  geom_point() + xlab('Sum of multiple dloops')
 
 dev.off()
