@@ -34,7 +34,7 @@ ggplot(data, aes(Length, GenomeLength, col=TAXON)) +
 
 ########## Dloop coverage
 
-data$DloopCoverage = data$Length / data$GenomeLength
+# data$DloopCoverage = data$Length / data$GenomeLength
 
 # ggplot(data, aes(DloopCoverage, GenomeLength, col=TAXON)) +
 #   geom_point() + xlab('D-loops coverage')
@@ -59,6 +59,18 @@ not_unique = merge(not_unique, CHOR[, c('Species', 'TAXON')])
 summary(not_unique$TAXON)
 
 write.table(not_unique, '../../Body/3Results/MultipleDloops.txt', sep='\t')
+
+not_unique$MultipleDloop = 1
+
+multDl = merge(Dloops, not_unique, all.x = TRUE)
+
+multDl[is.na(multDl$MultipleDloop),]$MultipleDloop = 0
+multDl = merge(multDl, data[, c('Species', 'GenomeLength')], by='Species', all.x = TRUE)
+
+legend_title <- "Presence of multiple d-loops"
+ggplot(multDl, aes(Length, GenomeLength, col=as.factor(MultipleDloop))) +
+  geom_point() + xlab('Dloops Length') + 
+  labs(colour=legend_title)
 
 ####################### 
 
