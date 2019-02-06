@@ -50,3 +50,45 @@ cor.test(data[data$clusterCut == 5,]$FullLength, data[data$clusterCut == 5,]$Gen
 third = data[data$clusterCut == 3,]
 
 summary(third)
+
+#######################################################################################
+### PCA 
+
+for_pca = clusters_table[, c('Species', 'fr_A_repeat', 'fr_T_repeat', 'fr_G_repeat', 'fr_C_repeat',
+                             'FullLength', 'CopyNumber', 'InDloop', 'PercentMatches')]
+
+a = prcomp(for_pca[, -1])
+
+plot(a, type = "l")
+
+summary(a)
+
+for_pca$Pca1 = a$x[, 1]
+for_pca$Pca2 = a$x[, 2]
+for_pca$Pca3 = a$x[, 3]
+
+for_pca[for_pca$Pca1 < quantile(for_pca$Pca1, 0.05),]$Species 
+for_pca[for_pca$Pca1 > quantile(for_pca$Pca1, 0.95),]$Species 
+
+summary(for_pca$Pca1)
+summary(for_pca$Pca2)
+summary(for_pca$Pca3)
+
+data = merge(for_pca, GenLength, by='Species')
+
+cor.test(data$GenerationLength_d, data$Pca1, method='spearman')
+cor.test(data$GenerationLength_d, data$Pca2, method='spearman')
+cor.test(data$GenerationLength_d, data$Pca3, method='spearman')
+
+pdf('../../Body/4Figures/PCA.pdf')
+
+par(mfrow=c(2,3))
+summary(a)
+plot(a)
+plot(data$Pca1, data$Pca2)
+plot(data$Pca2, data$Pca3)
+# plot(PCA$x[,1],MATRIX$GenerationLength_d); cor.test(PCA$x[,1],MATRIX$GenerationLength_d, method = 'spearman') # nothing  - First mutagen signature! Body mass normalized BMR!
+biplot(a, col = c('grey','black'), cex = 0.5)
+biplot(a, choices=c(2,3), col = c('grey','black'), cex = 0.5) #  biplot(princomp(USArrests),choices=c(1,3))
+
+dev.off()
