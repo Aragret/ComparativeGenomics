@@ -10,7 +10,7 @@ GenLength = GenLength[, c(14,16)]
 mamm = tr[tr$TAXON == 'Mammalia',]
 mamm$Consensus = as.character(mamm$Consensus)
 
-pdf('~/Desktop/MammClustersTr.pdf', width = 150, height = 150)
+pdf('../../Body/4Figures/MammClustersTr.pdf', width = 500, height = 500)
 
 dist_matrix = dist(mamm[, c('ConsensusLength', 'FullLength', 'CopyNumber', 'PercentMatches',
                             'fr_A_repeat', 'fr_T_repeat', 'fr_G_repeat', "fr_C_repeat", 'Consensus')])
@@ -24,6 +24,13 @@ clusterCut <- cutree(clusters, 5)
 clusters_table = cbind(mamm, clusterCut)
 
 dev.off()
+
+###### play with distance matrix
+
+dist_matrix = as.matrix(dist(mamm[, c('ConsensusLength', 'CopyNumber', 'PercentMatches',
+                            'fr_A_repeat', 'fr_T_repeat', 'fr_G_repeat', "fr_C_repeat")]))
+
+
 
 ############################################
 
@@ -56,6 +63,8 @@ summary(third)
 
 for_pca = clusters_table[, c('Species', 'fr_A_repeat', 'fr_T_repeat', 'fr_G_repeat', 'fr_C_repeat',
                              'FullLength', 'CopyNumber', 'InDloop', 'PercentMatches')]
+
+# consensus length instead of full length
 
 a = prcomp(for_pca[, -1])
 
