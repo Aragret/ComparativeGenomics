@@ -1,3 +1,21 @@
+rm(list = ls())
+# pairwise correlations
+
+tr = read.table('../../Body/3Results/TandRepInfo.txt', header=TRUE, sep = '\t')
+
+data = tr[, c('Species', 'ConsensusLength', 'CopyNumber', 'PercentMatches', 'fr_A_repeat',
+              'fr_T_repeat', 'fr_G_repeat', 'fr_C_repeat')]
+
+summary(data)
+
+pdf('../../Body/4Figures/TRclusters.R.pdf')
+plot(data[, -1])
+
+dev.off()
+
+######################################################################################
+########## PCA, clusterization
+
 library(stats)
 library(gdata)
 
