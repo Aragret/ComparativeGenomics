@@ -4,7 +4,7 @@ rm(list = ls())
 tr = read.table('../../Body/3Results/TandRepInfo.txt', header=TRUE, sep = '\t')
 
 data = tr[, c('Species', 'ConsensusLength', 'CopyNumber', 'PercentMatches', 'fr_A_repeat',
-              'fr_T_repeat', 'fr_G_repeat', 'fr_C_repeat')]
+              'fr_T_repeat', 'fr_G_repeat', 'fr_C_repeat', 'InDloop')]
 
 data$frA_repeat = data$fr_A_repeat / (data$fr_A_repeat + data$fr_T_repeat + data$fr_G_repeat + data$fr_C_repeat)
 data$frT_repeat = data$fr_T_repeat / (data$fr_A_repeat + data$fr_T_repeat + data$fr_G_repeat + data$fr_C_repeat)
@@ -12,7 +12,7 @@ data$frG_repeat = data$fr_G_repeat / (data$fr_A_repeat + data$fr_T_repeat + data
 data$frC_repeat = data$fr_C_repeat / (data$fr_A_repeat + data$fr_T_repeat + data$fr_G_repeat + data$fr_C_repeat)
 
 data = data[, c('Species', 'ConsensusLength', 'CopyNumber', 'PercentMatches', 'frA_repeat',
-              'frT_repeat', 'frG_repeat', 'frC_repeat')]
+              'frT_repeat', 'frG_repeat', 'frC_repeat', 'InDloop')]
 
 
 summary(data)
@@ -20,7 +20,9 @@ summary(data)
 round(cor(data[, -1]), 2)
 
 pdf('../../Body/4Figures/TRclusters.R.pdf')
-plot(data[, -1])
+plot(data[data$InDloop == 0, -c(1, 9)], main='Not in D-loop')
+plot(data[data$InDloop == 1, -c(1, 9)], main='In D-loop')
+
 
 dev.off()
 
