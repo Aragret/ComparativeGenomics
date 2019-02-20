@@ -5,6 +5,8 @@ library(gdata)
 CHOR = read.table('../../Body/2Derived/MitGenomics.txt', header=TRUE, sep='\t')
 CodonTable = unzip('../../Body/2Derived/AllGenesCodonUsageNoOverlap.txt.zip')
 CodonTable = read.table(CodonTable, header=TRUE, sep='\t')
+file.remove("../../Body/3Results//AllGenesCodonUsageNoOverlap.txt")
+
 GenLength = read.xls('../../Body/1Raw/GenerationLengthForMammals.xlsx')
 
 GenLength$Species = gsub(' ','_',GenLength$Scientific_name)
@@ -23,7 +25,7 @@ genes = as.character(unique(CodonTable$Gene))
 
 ### ecology
 
-CHOR = CHOR[, c('Species', 'ECO.Female.maturity..days.', 'ECO.Maximum.longevity..yrs.',
+CHOR = CHOR[CHOR$TAXON != 'AncientFish', c('Species', 'ECO.Female.maturity..days.', 'ECO.Maximum.longevity..yrs.',
                 'ECO.Body.mass..g.')]
 CHOR = merge(CHOR, GenLength, by='Species', all.x=TRUE)
 data = merge(CodonTable, CHOR, by='Species')
