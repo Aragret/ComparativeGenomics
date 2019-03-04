@@ -1,28 +1,38 @@
 rm(list = ls())
+library(gdata)
+
 # pairwise correlations
 
 tr = read.table('../../Body/3Results/TandRepInfo.txt', header=TRUE, sep = '\t')
+GenLength = read.xls('../../Body/1Raw/GenerationLengthForMammals.xlsx')
 
-data = tr[, c('Species', 'ConsensusLength', 'CopyNumber', 'PercentMatches', 'fr_A_repeat',
-              'fr_T_repeat', 'fr_G_repeat', 'fr_C_repeat', 'InDloop')]
+GenLength$Species = gsub(' ', '_', GenLength$Scientific_name)
+GenLength = GenLength[, c(14,16)]
+
+data = merge(tr, GenLength, by='Species')
 
 data$frA_repeat = data$fr_A_repeat / (data$fr_A_repeat + data$fr_T_repeat + data$fr_G_repeat + data$fr_C_repeat)
 data$frT_repeat = data$fr_T_repeat / (data$fr_A_repeat + data$fr_T_repeat + data$fr_G_repeat + data$fr_C_repeat)
 data$frG_repeat = data$fr_G_repeat / (data$fr_A_repeat + data$fr_T_repeat + data$fr_G_repeat + data$fr_C_repeat)
 data$frC_repeat = data$fr_C_repeat / (data$fr_A_repeat + data$fr_T_repeat + data$fr_G_repeat + data$fr_C_repeat)
 
-data = data[, c('Species', 'ConsensusLength', 'CopyNumber', 'PercentMatches', 'frA_repeat',
-              'frT_repeat', 'frG_repeat', 'frC_repeat', 'InDloop')]
+data$AT = data$frA_repeat + data$frT_repeat
+data$GC = data$frG_repeat + data$frC_repeat
 
+data$log_ConsensusLength = log(data$ConsensusLength)
+data$log_CopyNumber = log(data$CopyNumber)
+data$PercentMatches = as.numeric(data$PercentMatches)
+
+cor_data = data[, c('log_ConsensusLength', 'log_CopyNumber', 'PercentMatches', 'frA_repeat',
+              'frT_repeat', 'frG_repeat', 'frC_repeat', 'AT', 'GC')]
 
 summary(data)
 
-round(cor(data[, -1]), 2)
+# round(cor(data), 2)
 
-pdf('../../Body/4Figures/TRclusters.R.pdf')
-plot(data[data$InDloop == 0, -c(1, 9)], main='Not in D-loop')
-plot(data[data$InDloop == 1, -c(1, 9)], main='In D-loop')
+pdf('../../Body/4Figures/TRclusters.R.01.pdf')
 
+plot(cor_data)
 
 dev.off()
 
