@@ -23,16 +23,21 @@ data$log_ConsensusLength = log(data$ConsensusLength)
 data$log_CopyNumber = log(data$CopyNumber)
 data$PercentMatches = as.numeric(data$PercentMatches)
 
-cor_data = data[, c('log_ConsensusLength', 'log_CopyNumber', 'PercentMatches', 'frA_repeat',
-              'frT_repeat', 'frG_repeat', 'frC_repeat', 'AT', 'GC')]
-
-summary(data)
+cor_data = data[data$InDloop != 2, c('log_ConsensusLength', 'log_CopyNumber', 'PercentMatches', 'frA_repeat',
+              'frT_repeat', 'frG_repeat', 'frC_repeat', 'AT', 'GC', 'InDloop')]
 
 # round(cor(data), 2)
 
 pdf('../../Body/4Figures/TRclusters.R.01.pdf')
 
-plot(cor_data)
+plot(cor_data[, -10])
+
+# par(mar = rep(2, 4))
+par(mar = rep(2, 4), mfrow=c(3, 3))
+for(i in 1:9){
+  boxplot(cor_data[, i] ~ cor_data$InDloop)
+  title(main = colnames(cor_data)[i])
+}
 
 dev.off()
 
