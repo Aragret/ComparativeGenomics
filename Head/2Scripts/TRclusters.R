@@ -30,7 +30,10 @@ cor_data = data[data$InDloop != 2, c('log_ConsensusLength', 'log_CopyNumber', 'P
 
 pdf('../../Body/4Figures/TRclusters.R.01.pdf')
 
-plot(cor_data[, -10])
+plot(cor_data[cor_data$InDloop == 1, -10])
+title(main='In Dloop')
+plot(cor_data[cor_data$InDloop == 0, -10])
+title(main='Not in Dloop')
 
 # par(mar = rep(2, 4))
 par(mar = rep(2, 4), mfrow=c(3, 3))
