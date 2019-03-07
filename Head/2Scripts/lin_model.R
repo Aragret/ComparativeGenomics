@@ -23,3 +23,16 @@ data$FrC = data$C / data$GenomeLength
 data$DRCoverage = data$REP.DirRepLength / data$GenomeLength
 
 summary(lm(log(data$GenerationLength_d) ~ data$DRCoverage + data$FrA + data$FrT + data$FrG))
+
+################################################################################
+
+cor.test(data$GenerationLength_d, data$DRCoverage, method = 'spearman')
+# rho -0.1519978, pvalue 5.011e-05
+
+summary(lm(data$DRCoverage ~ data$FrA + data$FrT + data$FrG))
+
+# (Intercept)  -0.5108     0.1480  -3.452 0.000590 ***
+#   data$FrA      0.9762     0.2995   3.260 0.001170 ** 
+#   data$FrT      0.7906     0.1495   5.287 1.66e-07 ***
+#   data$FrG      1.5478     0.4581   3.379 0.000768 ***
+
