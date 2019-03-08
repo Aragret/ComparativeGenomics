@@ -36,3 +36,13 @@ summary(lm(data$DRCoverage ~ data$FrA + data$FrT + data$FrG))
 #   data$FrT      0.7906     0.1495   5.287 1.66e-07 ***
 #   data$FrG      1.5478     0.4581   3.379 0.000768 ***
 
+par(mfrow=c(2, 2))
+hist(data$FrA, breaks = 50)
+hist(data$FrT, breaks = 50)
+hist(data$FrG, breaks = 50)
+hist(data$FrC, breaks = 50)
+
+summary(data$FrA)
+summary(data$FrT)
+summary(data$FrG)
+summary(data$FrC)
