@@ -46,3 +46,15 @@ summary(data$FrA)
 summary(data$FrT)
 summary(data$FrG)
 summary(data$FrC)
+
+#####################################################################################
+### pairwise correlations
+
+nucl_freqs = data[, c('FrA', 'FrT', 'FrG', 'FrC')]
+
+round(cor(nucl_freqs), 2)
+
+pdf('../../Body/4Figures/lin_model.R.NucleotidesPairwiseCorrs.pdf')
+plot(nucl_freqs)
+dev.off()
+
