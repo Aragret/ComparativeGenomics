@@ -27,12 +27,14 @@ genes = as.character(unique(CodonTable$Gene))
 
 CHOR = CHOR[CHOR$TAXON != 'AncientFish', c('Species', 'ECO.Female.maturity..days.', 'ECO.Maximum.longevity..yrs.',
                 'ECO.Body.mass..g.')]
-CHOR = merge(CHOR, GenLength, by='Species', all.x=TRUE)
+
+CHOR = merge(CHOR[], GenLength, by='Species', all.x=TRUE)
+CHOR = CHOR[-2236,] #rm duplicate sp.
 data = merge(CodonTable, CHOR, by='Species')
 
 Final <- data[rowSums(is.na(data[, c(79:82)])) != 4,]
 
-length(unique(Final$Species)) # 1300
+length(unique(Final$Species))
 
 #### write to fasta
 dir.create('../../Body/2Derived/ForAlign')
