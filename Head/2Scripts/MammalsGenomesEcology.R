@@ -17,7 +17,7 @@ dupl = GenLength[GenLength$Species == "Neophocaena_phocaenoides",]
 gl = c(mean(dupl$GenerationLength_d), 'Neophocaena_phocaenoides')
 GenLength = GenLength[GenLength$Species != 'Neophocaena_phocaenoides',]
 GenLength = rbind(GenLength, gl)
-write.table(GenLength, '../../Body/2Derived/GenerationLength.txt', sep='\t', quote = F, row.names = F)
+# write.table(GenLength, '../../Body/2Derived/GenerationLength.txt', sep='\t', quote = F, row.names = F)
 
 fastaFile <- readDNAStringSet("../../Body/2Derived/mammalia_genomes.fa")
 Species = names(fastaFile)
@@ -29,3 +29,4 @@ data = merge(data, CHOR[, c('Species', 'REP.DirRepLength', 'GenomeLength', 'A', 
 data = data[, -10]
 
 write.fasta(as.list(data$Sequence), data$Species, '../../Body/2Derived/MammalsGenomesWithEcology.fasta')
+write.table(data, '../../Body/2Derived/MammalsGenomesEcology.txt', sep='\t', quote = F, row.names = F)
