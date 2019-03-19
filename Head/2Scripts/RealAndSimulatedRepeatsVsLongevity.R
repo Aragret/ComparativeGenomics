@@ -26,6 +26,32 @@ par(mfrow=c(1,2))
 plot(log2(Rep$generlen),log2(Rep$TLOfADRRreal))
 plot(log2(Rep$generlen),log2(Rep$TLOfADRR1))
 
+# dev.off()
+
+#########################################################################################
+######################### PICs
+
+library(ape)
+
+tree <- read.tree("../../Body/1Raw/mtalign.aln.treefile.rooted")
+
+data = Rep[which(as.character(Rep$spece) %in% tree$tip.label),]
+row.names(data) = data$spece
+
+df_vec <- as.character(Rep$spece)
+tree_vec <- tree$tip.label
+
+a <- setdiff(df_vec, tree_vec)
+b <- setdiff(tree_vec, df_vec)
+
+tree2 <- drop.tip(tree, b)
+
+TempData = data[, c('generlen', 'TLOfADRRreal', 'TLOfADRR1')]
+contrasts <- as.data.frame(apply(TempData, 2, pic, tree2))
+names(contrasts) = names(TempData)
+
+par(mfrow=c(2,1))
+plot(log(contrasts$generlen), log(contrasts$TLOfADRRreal))
+plot(log(contrasts$generlen), log(contrasts$TLOfADRR1))
+
 dev.off()
-
-
