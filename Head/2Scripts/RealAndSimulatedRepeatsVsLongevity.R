@@ -31,7 +31,7 @@ plot(log2(Rep$generlen),log2(Rep$TLOfADRR1))
 #########################################################################################
 ######################### PICs
 
-library(ape)
+library(ape) # install.packages('ape') 
 
 tree <- read.tree("../../Body/1Raw/mtalign.aln.treefile.rooted")
 
@@ -47,11 +47,12 @@ b <- setdiff(tree_vec, df_vec)
 tree2 <- drop.tip(tree, b)
 
 TempData = data[, c('generlen', 'TLOfADRRreal', 'TLOfADRR1')]
+TempData[,1] = log2(TempData[,1]); TempData[,2] = log2(TempData[,2]);  TempData[,3] = log2(TempData[,3]); 
 contrasts <- as.data.frame(apply(TempData, 2, pic, tree2))
 names(contrasts) = names(TempData)
 
-par(mfrow=c(2,1))
-plot(log(contrasts$generlen), log(contrasts$TLOfADRRreal))
-plot(log(contrasts$generlen), log(contrasts$TLOfADRR1))
+par(mfrow=c(2,2))
+plot(contrasts$generlen, contrasts$TLOfADRRreal); cor.test(contrasts$generlen, contrasts$TLOfADRRreal, method = 'spearman', alternative = 'less') # nonsignificant
+plot(contrasts$generlen, contrasts$TLOfADRR1); cor.test(contrasts$generlen, contrasts$TLOfADRR1, method = 'spearman', alternative = 'less')       # marginally
 
 dev.off()
