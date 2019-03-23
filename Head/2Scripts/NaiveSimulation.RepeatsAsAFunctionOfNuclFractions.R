@@ -26,9 +26,11 @@ summ = summarise(grRepeats, meanTotalDrCoverage = mean(TotalDirRepCoverage),
 ggplot(summ, aes(FrA, meanTotalDrCoverage)) + 
   geom_point(size = 2) + 
   geom_line(size = 0.2) +
-  geom_errorbar(aes(ymin = y_min, ymax = y_max), width = 0.01)
+  geom_errorbar(aes(ymin = y_min, ymax = y_max), width = 0.01) + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  xlab('Fraction of A') + ylab('Fraction of direct repeats')
 
-pdf('../../Body/4Figures/NaiveSimulation.RepeatsAsAFunctionOfNuclFractions.R.01.pdf')
 
 boxplot(Rep$TotalLengthOfDirRepeats[1:10],Rep$TotalLengthOfDirRepeats[11:20],Rep$TotalLengthOfDirRepeats[21:30],Rep$TotalLengthOfDirRepeats[31:40],Rep$TotalLengthOfDirRepeats[41:50],Rep$TotalLengthOfDirRepeats[51:60],Rep$TotalLengthOfDirRepeats[61:70],Rep$TotalLengthOfDirRepeats[71:80],Rep$TotalLengthOfDirRepeats[81:90])
 
