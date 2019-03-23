@@ -46,6 +46,30 @@ b <- setdiff(tree_vec, df_vec)
 
 tree2 <- drop.tip(tree, b)
 
+
+### rho vs p 
+
+VecOfP = c(); VecOfRho = c(); 
+for (i in 8:ncol(Rep))
+{ # i = 8
+  p = as.numeric(cor.test(pic(Rep[,i], tree2), pic(Rep$generlen, tree2), method = 'spearman')[3])
+  rho = as.numeric(cor.test(pic(Rep[,i], tree2), pic(Rep$generlen, tree2), method = 'spearman')[4])
+  VecOfP = c(VecOfP,p)
+  VecOfRho = c(VecOfRho,rho)
+}
+summary(VecOfP)
+summary(VecOfRho)
+
+par(mfrow=c(1,1))
+plot(VecOfRho[2:101],-log10(VecOfP[2:101]), ylim=c(min(-log10(VecOfP)),max(-log10(VecOfP))), xlim = c(min(VecOfRho),max(VecOfRho)), pch = 16, col = rgb(0.1,0.1,0.1,0.5), xlab = '', ylab = ''); par(new=TRUE)
+plot(VecOfRho[1],-log10(VecOfP[1]), ylim=c(min(-log10(VecOfP)),max(-log10(VecOfP))), xlim = c(min(VecOfRho),max(VecOfRho)), pch = 16, col = rgb(1,0,0,1), xlab = 'rho', ylab = '-log10(p value)');
+
+par(mfrow=c(1,1))
+hist(VecOfRho[2:101], breaks = 15, xlim = c(min(VecOfRho),max(VecOfRho)), col = 'grey')
+abline(v = VecOfRho[1], col = 'red', lwd = 3)
+
+##############
+
 TempData = data[, c('generlen', 'TLOfADRRreal', 'TLOfADRR1')]
 TempData[,1] = log2(TempData[,1]); TempData[,2] = log2(TempData[,2]);  TempData[,3] = log2(TempData[,3]); 
 contrasts <- as.data.frame(apply(TempData, 2, pic, tree2))
