@@ -17,15 +17,20 @@ Rep$FrA = sapply(Rep$V2, FUN=getFrA)
 
 grRepeats = group_by(Rep, FrA)
 
+# summ = summarise(grRepeats, meanTotalDrCoverage = mean(TotalDirRepCoverage),
+#                  y_max = mean(TotalDirRepCoverage) + 
+#                    1.96 * sd(TotalDirRepCoverage) / sqrt(length(TotalDirRepCoverage)), 
+#                  y_min = mean(TotalDirRepCoverage) - 
+#                    1.96 * sd(TotalDirRepCoverage) / sqrt(length(TotalDirRepCoverage)))
+
 summ = summarise(grRepeats, meanTotalDrCoverage = mean(TotalDirRepCoverage),
-                 y_max = mean(TotalDirRepCoverage) + 
-                   1.96 * sd(TotalDirRepCoverage) / sqrt(length(TotalDirRepCoverage)), 
-                 y_min = mean(TotalDirRepCoverage) - 
-                   1.96 * sd(TotalDirRepCoverage) / sqrt(length(TotalDirRepCoverage)))
+                 y_max = max(TotalDirRepCoverage), 
+                 y_min = min(TotalDirRepCoverage))
+
 
 ggplot(summ, aes(FrA, meanTotalDrCoverage)) + 
   geom_point(size = 2) + 
-  geom_line(size = 0.2) +
+  geom_line(color = 'red') +
   geom_errorbar(aes(ymin = y_min, ymax = y_max), width = 0.01) + 
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black")) +
