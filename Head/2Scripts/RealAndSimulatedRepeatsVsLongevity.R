@@ -81,10 +81,11 @@ newdata <- subset(newdata, !(newdata$TLOfADRRreal > quantile(newdata$TLOfADRRrea
 newdata <- subset(newdata, !(newdata$TLOfADRR1 > quantile(newdata$TLOfADRR1, probs=c(.01, .99))[2] | newdata$TLOfADRR1 < quantile(newdata$TLOfADRR1, probs=c(.01, .99))[1]) ) 
 
 par(mfrow=c(2,2))
-plot(contrasts$generlen, contrasts$TLOfADRRreal); cor.test(contrasts$generlen, contrasts$TLOfADRRreal, method = 'spearman', alternative = 'less') # nonsignificant
-plot(contrasts$generlen, contrasts$TLOfADRR1); cor.test(contrasts$generlen, contrasts$TLOfADRR1, method = 'spearman', alternative = 'less')       # marginally
 
-plot(newdata$generlen, newdata$TLOfADRRreal); cor.test(newdata$generlen, newdata$TLOfADRRreal, method = 'spearman', alternative = 'less') # nonsignificant
-plot(newdata$generlen, newdata$TLOfADRR1); cor.test(newdata$generlen, newdata$TLOfADRR1, method = 'spearman', alternative = 'less') # nonsignificant
+plot(contrasts$generlen, contrasts$TLOfADRRreal, col = rgb(0.1,0.1,0.1,0.5)); # cor.test(contrasts$generlen, contrasts$TLOfADRRreal, method = 'spearman', alternative = 'less') # nonsignificant
+plot(contrasts$generlen, contrasts$TLOfADRR1, col = rgb(0.1,0.1,0.1,0.5)); # cor.test(contrasts$generlen, contrasts$TLOfADRR1, method = 'spearman', alternative = 'less')       # marginally
+
+plot(newdata$generlen, newdata$TLOfADRRreal, col = rgb(0.1,0.1,0.1,0.1), pch = 16, cex = 2); # cor.test(newdata$generlen, newdata$TLOfADRRreal, method = 'spearman', alternative = 'less') # nonsignificant
+plot(newdata$generlen, newdata$TLOfADRR1, col = rgb(0.1,0.1,0.1,0.5)); # cor.test(newdata$generlen, newdata$TLOfADRR1, method = 'spearman', alternative = 'less') # nonsignificant
 
 dev.off()
