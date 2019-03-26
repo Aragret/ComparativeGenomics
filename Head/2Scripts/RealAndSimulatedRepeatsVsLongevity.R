@@ -75,8 +75,16 @@ TempData[,1] = log2(TempData[,1]); TempData[,2] = log2(TempData[,2]);  TempData[
 contrasts <- as.data.frame(apply(TempData, 2, pic, tree2))
 names(contrasts) = names(TempData)
 
+
+newdata <- subset(contrasts, !(contrasts$generlen > quantile(contrasts$generlen, probs=c(.01, .99))[2] | contrasts$generlen < quantile(contrasts$generlen, probs=c(.01, .99))[1]) ) 
+newdata <- subset(newdata, !(newdata$TLOfADRRreal > quantile(newdata$TLOfADRRreal, probs=c(.01, .99))[2] | newdata$TLOfADRRreal < quantile(newdata$TLOfADRRreal, probs=c(.01, .99))[1]) ) 
+newdata <- subset(newdata, !(newdata$TLOfADRR1 > quantile(newdata$TLOfADRR1, probs=c(.01, .99))[2] | newdata$TLOfADRR1 < quantile(newdata$TLOfADRR1, probs=c(.01, .99))[1]) ) 
+
 par(mfrow=c(2,2))
 plot(contrasts$generlen, contrasts$TLOfADRRreal); cor.test(contrasts$generlen, contrasts$TLOfADRRreal, method = 'spearman', alternative = 'less') # nonsignificant
 plot(contrasts$generlen, contrasts$TLOfADRR1); cor.test(contrasts$generlen, contrasts$TLOfADRR1, method = 'spearman', alternative = 'less')       # marginally
+
+plot(newdata$generlen, newdata$TLOfADRRreal); cor.test(newdata$generlen, newdata$TLOfADRRreal, method = 'spearman', alternative = 'less') # nonsignificant
+plot(newdata$generlen, newdata$TLOfADRR1); cor.test(newdata$generlen, newdata$TLOfADRR1, method = 'spearman', alternative = 'less') # nonsignificant
 
 dev.off()
