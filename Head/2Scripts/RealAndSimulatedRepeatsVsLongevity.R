@@ -80,8 +80,16 @@ names(contrasts) = names(TempData)
 cor.test(contrasts$generlen, contrasts$TLOfADRR1, method='spearman')
 cor.test(contrasts$generlen, contrasts$TLOfADRRreal, method='spearman')
 
+library(pacman)
+p_load(tibble, dplyr, magrittr, purrr)
+contrasts <- data %>% 
+  select(generlen, TLOfADRRreal, TLOfADRR1) %>% 
+  mutate_if(is.numeric, log2) %>% 
+  map(pic, tree2)
+
+
 summary(contrasts$generlen)
-summary(pic(TempData$generlen, tree2))
+summary(pic(log2(data$generlen), tree2))
 
 newdata <- subset(contrasts, !(contrasts$generlen > quantile(contrasts$generlen, probs=c(.01, .99))[2] | contrasts$generlen < quantile(contrasts$generlen, probs=c(.01, .99))[1]) ) 
 newdata <- subset(newdata, !(newdata$TLOfADRRreal > quantile(newdata$TLOfADRRreal, probs=c(.01, .99))[2] | newdata$TLOfADRRreal < quantile(newdata$TLOfADRRreal, probs=c(.01, .99))[1]) ) 
