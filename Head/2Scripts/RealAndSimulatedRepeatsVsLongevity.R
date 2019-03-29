@@ -52,8 +52,8 @@ tree2 <- drop.tip(tree, b)
 VecOfP = c(); VecOfRho = c(); 
 for (i in 8:ncol(Rep))
 { # i = 8
-  p = as.numeric(cor.test(pic(Rep[,i], tree2), pic(Rep$generlen, tree2), method = 'spearman')[3])
-  rho = as.numeric(cor.test(pic(Rep[,i], tree2), pic(Rep$generlen, tree2), method = 'spearman')[4])
+  p = as.numeric(cor.test(pic(log2(data[,i]), tree2), pic(log2(data$generlen), tree2), method = 'spearman')[3])
+  rho = as.numeric(cor.test(pic(log2(data[,i]), tree2), pic(log2(data$generlen), tree2), method = 'spearman')[4])
   VecOfP = c(VecOfP,p)
   VecOfRho = c(VecOfRho,rho)
 }
@@ -70,11 +70,18 @@ abline(v = VecOfRho[1], col = 'red', lwd = 3)
 
 ##############
 
+maxRho = match(min(VecOfRho), VecOfRho)
+
 TempData = data[, c('generlen', 'TLOfADRRreal', 'TLOfADRR1')]
-TempData[,1] = log2(TempData[,1]); TempData[,2] = log2(TempData[,2]);  TempData[,3] = log2(TempData[,3]); 
+# cor.test(Rep$generlen, Rep$TLOfADRR1, method='spearman')
+TempData[,1] = log2(TempData[,1]); TempData[,2] = log2(TempData[,2]); TempData[,3] = log2(TempData[,3]); 
 contrasts <- as.data.frame(apply(TempData, 2, pic, tree2))
 names(contrasts) = names(TempData)
+cor.test(contrasts$generlen, contrasts$TLOfADRR1, method='spearman')
+cor.test(contrasts$generlen, contrasts$TLOfADRRreal, method='spearman')
 
+summary(contrasts$generlen)
+summary(pic(TempData$generlen, tree2))
 
 newdata <- subset(contrasts, !(contrasts$generlen > quantile(contrasts$generlen, probs=c(.01, .99))[2] | contrasts$generlen < quantile(contrasts$generlen, probs=c(.01, .99))[1]) ) 
 newdata <- subset(newdata, !(newdata$TLOfADRRreal > quantile(newdata$TLOfADRRreal, probs=c(.01, .99))[2] | newdata$TLOfADRRreal < quantile(newdata$TLOfADRRreal, probs=c(.01, .99))[1]) ) 
@@ -82,10 +89,11 @@ newdata <- subset(newdata, !(newdata$TLOfADRR1 > quantile(newdata$TLOfADRR1, pro
 
 par(mfrow=c(2,2))
 
-plot(contrasts$generlen, contrasts$TLOfADRRreal, col = rgb(0.1,0.1,0.1,0.5)); # cor.test(contrasts$generlen, contrasts$TLOfADRRreal, method = 'spearman', alternative = 'less') # nonsignificant
-plot(contrasts$generlen, contrasts$TLOfADRR1, col = rgb(0.1,0.1,0.1,0.5)); # cor.test(contrasts$generlen, contrasts$TLOfADRR1, method = 'spearman', alternative = 'less')       # marginally
+# plot(contrasts$generlen, contrasts$TLOfADRRreal, col = rgb(0.1,0.1,0.1,0.5)); # cor.test(contrasts$generlen, contrasts$TLOfADRRreal, method = 'spearman', alternative = 'less') # nonsignificant
+# plot(contrasts$generlen, contrasts$TLOfADRR1, col = rgb(0.1,0.1,0.1,0.5)); # cor.test(contrasts$generlen, contrasts$TLOfADRR1, method = 'spearman', alternative = 'less')       # marginally
 
 plot(newdata$generlen, newdata$TLOfADRRreal, col = rgb(0.1,0.1,0.1,0.1), pch = 16, cex = 2); # cor.test(newdata$generlen, newdata$TLOfADRRreal, method = 'spearman', alternative = 'less') # nonsignificant
-plot(newdata$generlen, newdata$TLOfADRR1, col = rgb(0.1,0.1,0.1,0.5)); # cor.test(newdata$generlen, newdata$TLOfADRR1, method = 'spearman', alternative = 'less') # nonsignificant
+plot(newdata$generlen, newdata$TLOfADRR1, col = rgb(0.1,0.1,0.1,0.1), pch = 16, cex = 2,
+     ylim = c(min(newdata$TLOfADRRreal), max(newdata$TLOfADRRreal))); cor.test(newdata$generlen, newdata$TLOfADRR1, method = 'spearman', alternative = 'less') # nonsignificant
 
 dev.off()
