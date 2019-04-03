@@ -91,9 +91,12 @@ contrasts <- data %>%
 summary(contrasts$generlen)
 summary(pic(log2(data$generlen), tree2))
 
-newdata <- subset(contrasts, !(contrasts$generlen > quantile(contrasts$generlen, probs=c(.01, .99))[2] | contrasts$generlen < quantile(contrasts$generlen, probs=c(.01, .99))[1]) ) 
-newdata <- subset(newdata, !(newdata$TLOfADRRreal > quantile(newdata$TLOfADRRreal, probs=c(.01, .99))[2] | newdata$TLOfADRRreal < quantile(newdata$TLOfADRRreal, probs=c(.01, .99))[1]) ) 
-newdata <- subset(newdata, !(newdata$TLOfADRR1 > quantile(newdata$TLOfADRR1, probs=c(.01, .99))[2] | newdata$TLOfADRR1 < quantile(newdata$TLOfADRR1, probs=c(.01, .99))[1]) ) 
+a = as.data.frame(contrasts)
+# newdata <- subset(contrasts, !(contrasts$generlen > quantile(contrasts$generlen, probs=c(.03, .97))[2] | contrasts$generlen < quantile(contrasts$generlen, probs=c(.01, .99))[1]) ) 
+
+newdata <- subset(a, !(a$generlen > quantile(a$generlen, probs=c(.03, .97))[2] | a$generlen < quantile(a$generlen, probs=c(.01, .99))[1]) ) 
+newdata <- subset(newdata, !(newdata$TLOfADRRreal > quantile(newdata$TLOfADRRreal, probs=c(.03, .97))[2] | newdata$TLOfADRRreal < quantile(newdata$TLOfADRRreal, probs=c(.01, .99))[1]) ) 
+newdata <- subset(newdata, !(newdata$TLOfADRR1 > quantile(newdata$TLOfADRR1, probs=c(.03, .97))[2] | newdata$TLOfADRR1 < quantile(newdata$TLOfADRR1, probs=c(.01, .99))[1]) ) 
 
 par(mfrow=c(2,2))
 
@@ -105,3 +108,4 @@ plot(newdata$generlen, newdata$TLOfADRR1, col = rgb(0.1,0.1,0.1,0.1), pch = 16, 
      ylim = c(min(newdata$TLOfADRRreal), max(newdata$TLOfADRRreal))); cor.test(newdata$generlen, newdata$TLOfADRR1, method = 'spearman', alternative = 'less') # nonsignificant
 
 dev.off()
+
