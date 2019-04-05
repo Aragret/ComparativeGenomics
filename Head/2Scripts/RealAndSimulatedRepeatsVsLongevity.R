@@ -65,7 +65,7 @@ plot(VecOfRho[2:101],-log10(VecOfP[2:101]), ylim=c(min(-log10(VecOfP)),max(-log1
 plot(VecOfRho[1],-log10(VecOfP[1]), ylim=c(min(-log10(VecOfP)),max(-log10(VecOfP))), xlim = c(min(VecOfRho),max(VecOfRho)), pch = 16, col = rgb(1,0,0,1), xlab = 'rho', ylab = '-log10(p value)');
 
 par(mfrow=c(1,1))
-hist(VecOfRho[2:101], breaks = 15, xlim = c(min(VecOfRho),max(VecOfRho)), col = 'grey')
+hist(VecOfRho[2:101], breaks = 15, xlim = c(-0.25, -0.05), col = 'grey')
 abline(v = VecOfRho[1], col = 'red', lwd = 3)
 
 ##############
