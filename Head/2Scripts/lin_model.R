@@ -92,6 +92,7 @@ b <- setdiff(tree_vec, df_vec)
 tree2 <- drop.tip(tree, b)
 
 #################################################################################
+######## without log
 
 library(pacman)
 p_load(tibble, dplyr, magrittr, purrr)
@@ -102,6 +103,32 @@ contrasts <- data %>%
 # summary(contrasts$GenerationLength_d)
 
 contrasts = as.data.frame(contrasts)
+
+summary(lm(DRCoverage ~ GenerationLength_d + FrA, contrasts))
+# Estimate Std. Error t value Pr(>|t|)   
+# (Intercept)        -3.487e-02  1.982e-02  -1.759  0.07895 . 
+# GenerationLength_d  3.275e-06  1.501e-06   2.183  0.02938 * 
+#   FrA                 7.427e-01  2.678e-01   2.774  0.00569 **
+
+summary(lm(DRCoverage ~ GenerationLength_d + FrT, contrasts))
+# (Intercept)        -2.794e-02  1.984e-02  -1.408 0.159519    
+# GenerationLength_d  4.663e-06  1.610e-06   2.896 0.003892 ** 
+#   FrT                 4.356e-01  1.316e-01   3.311 0.000977 ***
+
+summary(lm(DRCoverage ~ GenerationLength_d + FrG, contrasts))
+# (Intercept)        -3.369e-02  1.995e-02  -1.689   0.0917 .
+# GenerationLength_d  2.467e-06  1.520e-06   1.623   0.1051  
+# FrG                 2.940e-02  4.112e-01   0.071   0.9430  
+
+summary(lm(DRCoverage ~ GenerationLength_d + FrC, contrasts))
+# (Intercept)        -2.789e-02  1.964e-02  -1.420 0.156091    
+# GenerationLength_d  5.787e-06  1.612e-06   3.590 0.000354 ***
+#   FrC                -6.324e-01  1.319e-01  -4.795 1.99e-06 ***
+
+summary(lm(DRCoverage ~ GenerationLength_d, contrasts))
+# (Intercept)        -3.362e-02  1.991e-02  -1.689   0.0917 .
+# GenerationLength_d  2.491e-06  1.481e-06   1.683   0.0929 .
+
 
 summary(lm(DRCoverage ~ 0 + GenerationLength_d + FrA, contrasts))
 # Estimate Std. Error t value Pr(>|t|)   
@@ -124,6 +151,7 @@ summary(lm(DRCoverage ~ 0 + GenerationLength_d, contrasts))
 # GenerationLength_d 2.575e-06  1.482e-06   1.737   0.0827 .
 
 #################################################################################
+############### with log
 
 contrasts <- data %>% 
   select(GenerationLength_d, FrA, FrT, FrG, FrC, DRCoverage) %>% 
@@ -139,6 +167,11 @@ summary(lm(DRCoverage ~ GenerationLength_d + FrA, contrasts))
 # (Intercept)        -0.214368   0.095317  -2.249   0.0248 * 
 #   GenerationLength_d -0.005679   0.013070  -0.435   0.6641   
 # FrA                 0.947124   0.293243   3.230   0.0013 **
+
+summary(lm(DRCoverage ~ GenerationLength_d + FrT, contrasts))
+# (Intercept)        -0.189388   0.096025  -1.972   0.0490 *
+# GenerationLength_d  0.001839   0.014794   0.124   0.9011  
+# FrT                 0.272742   0.128884   2.116   0.0347 *
 
 summary(lm(DRCoverage ~ 0 + GenerationLength_d + FrT, contrasts))
 # GenerationLength_d 0.003499   0.014801   0.236   0.8132  
