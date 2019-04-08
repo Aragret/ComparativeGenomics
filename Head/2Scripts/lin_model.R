@@ -31,6 +31,15 @@ summary(lm(log(data$GenerationLength_d) ~ data$DRCoverage + data$FrA + data$FrT 
 #   data$FrT        -17.9156     1.4846 -12.067  < 2e-16 ***
 #   data$FrG         -6.7906     4.4961  -1.510    0.131    
 
+summary(lm(log(data$DRCoverage) ~ log(data$GenerationLength_d) + data$FrA + data$FrT + data$FrG))
+# (Intercept)                  -3.845506   0.545880  -7.045 4.45e-12 ***
+#   log(data$GenerationLength_d) -0.006054   0.012950  -0.468 0.640277    
+# data$FrA                      3.357545   1.014683   3.309 0.000984 ***
+#   data$FrT                      2.713117   0.550534   4.928 1.04e-06 ***
+#   data$FrG                      4.175280   1.531670   2.726 0.006571 ** 
+
+summary(lm(log(data$DRCoverage) ~ log(data$GenerationLength_d)))
+
 ################################################################################
 
 cor.test(data$GenerationLength_d, data$DRCoverage, method = 'spearman')
@@ -104,6 +113,9 @@ contrasts <- data %>%
 
 contrasts = as.data.frame(contrasts)
 
+cor.test(contrasts$GenerationLength_d, contrasts$DRCoverage, method = 'spearman')
+plot(contrasts$GenerationLength_d, contrasts$DRCoverage)
+
 summary(lm(DRCoverage ~ GenerationLength_d + FrA, contrasts))
 # Estimate Std. Error t value Pr(>|t|)   
 # (Intercept)        -3.487e-02  1.982e-02  -1.759  0.07895 . 
@@ -162,11 +174,17 @@ contrasts <- data %>%
 
 contrasts = as.data.frame(contrasts)
 
+cor.test(contrasts$GenerationLength_d, contrasts$DRCoverage, method = 'spearman')
+
 summary(lm(DRCoverage ~ GenerationLength_d + FrA, contrasts))
 # Estimate Std. Error t value Pr(>|t|)   
 # (Intercept)        -0.214368   0.095317  -2.249   0.0248 * 
 #   GenerationLength_d -0.005679   0.013070  -0.435   0.6641   
 # FrA                 0.947124   0.293243   3.230   0.0013 **
+
+summary(lm(DRCoverage ~ 0 + GenerationLength_d + FrA, contrasts))
+# GenerationLength_d -0.005294   0.013107  -0.404  0.68642   
+# FrA                 0.930128   0.293992   3.164  0.00162 **
 
 summary(lm(DRCoverage ~ GenerationLength_d + FrT, contrasts))
 # (Intercept)        -0.189388   0.096025  -1.972   0.0490 *
@@ -183,13 +201,23 @@ summary(lm(DRCoverage ~ GenerationLength_d + FrG, contrasts))
 #   GenerationLength_d -0.01170    0.01351  -0.866   0.3868  
 # FrG                -0.08649    0.18640  -0.464   0.6428  
 
+summary(lm(DRCoverage ~ 0 + GenerationLength_d + FrG, contrasts))
+# GenerationLength_d -0.01082    0.01353  -0.799    0.424
+# FrG                -0.10474    0.18667  -0.561    0.575
+
 summary(lm(DRCoverage ~ GenerationLength_d + FrC, contrasts))
 # Estimate Std. Error t value Pr(>|t|)    
 # (Intercept)        -0.18158    0.09471  -1.917   0.0556 .  
 # GenerationLength_d  0.02153    0.01482   1.452   0.1469    
 # FrC                -0.54527    0.11781  -4.628 4.39e-06 ***
 
+summary(lm(DRCoverage ~ 0 + GenerationLength_d + FrC, contrasts))
+# GenerationLength_d  0.02280    0.01484   1.536    0.125    
+# FrC                -0.55808    0.11784  -4.736 2.64e-06 ***
+
 summary(lm(DRCoverage ~ GenerationLength_d, contrasts))
 # (Intercept)        -0.20643    0.09592  -2.152   0.0317 *
 #  GenerationLength_d -0.01349    0.01293  -1.044   0.2970  
 
+summary(lm(DRCoverage ~ 0 + GenerationLength_d, contrasts))
+# GenerationLength_d -0.01299    0.01296  -1.002    0.317
