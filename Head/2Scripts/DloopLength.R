@@ -4,7 +4,7 @@ Dloops = read.table('../../Body/2Derived/dloops_control_regions.txt', header=TRU
                     row.names = NULL)
 names(Dloops) = c('Species', 'Feature_name', 'Feature_location', 'Strand', 'Sequence', 'Notes')
 CHOR = read.table('../../Body/2Derived/MitGenomics.txt', header=TRUE, sep='\t')
-
+CHOR = CHOR[CHOR$TAXON != "AncientFish", ]
 ####### 
 
 Dloops$Length = as.numeric(lapply(as.character(Dloops$Sequence), nchar))
@@ -82,5 +82,31 @@ one_sp_one_cr = merge(data[, c('Species', 'TAXON', 'GenomeLength', 'ECO.Maximum.
 
 ggplot(one_sp_one_cr, aes(DloopsLength, GenomeLength, col=TAXON)) +
   geom_point() + xlab('Sum of multiple dloops')
+
+dev.off()
+
+##########################################################################################
+##########################################################################################
+
+a = merge(data, not_unique, all.x = TRUE)
+a = a[, c('Species', 'TAXON', 'Length', 'GenomeLength', 'MultipleDloop')]
+
+pdf('../../Body/4Figures/DloopLength.R.Figure1.pdf')
+
+for(taxon in unique(data$TAXON)){
+  # taxon = "Actinopterygii"
+  temp_data = a[a$TAXON == taxon,]
+  # a = cor.test(temp_data$GenomeLength, temp_data$Length)
+  
+  
+  print(ggplot(temp_data, aes(Length, GenomeLength)) +
+    geom_point(size = 3, alpha = 0.1) +
+    ggtitle(taxon) +
+    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+          panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+    xlim(min(data$Length), max(data$Length)) + ylim(min(data$GenomeLength), max(data$GenomeLength)) +
+    geom_point(aes(Length, GenomeLength, size = MultipleDloop), alpha = 0.3))
+
+}
 
 dev.off()
