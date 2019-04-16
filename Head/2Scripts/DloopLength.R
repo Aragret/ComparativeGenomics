@@ -78,9 +78,9 @@ AGG = aggregate(data$Length, by=list(data$Species), sum)
 
 names(AGG) = c('Species', 'DloopsLength')
 
-one_sp_one_cr = merge(data[, c('Species', 'TAXON', 'GenomeLength', 'ECO.Maximum.longevity..yrs.')], AGG, by='Species')
+oneSpOneCr = merge(AGG, CHOR[, c('Species', 'TAXON', 'GenomeLength', 'ECO.Maximum.longevity..yrs.')], by='Species', all.y = FALSE)
 
-ggplot(one_sp_one_cr, aes(DloopsLength, GenomeLength, col=TAXON)) +
+ggplot(oneSpOneCr, aes(DloopsLength, GenomeLength, col=TAXON)) +
   geom_point() + xlab('Sum of multiple dloops')
 
 dev.off()
@@ -110,3 +110,50 @@ for(taxon in unique(data$TAXON)){
 }
 
 dev.off()
+
+
+########################################################################################
+#### tables
+
+for(taxon in unique(oneSpOneCr$TAXON)){
+  TempData = oneSpOneCr[oneSpOneCr$TAXON == taxon, ]
+  print(taxon)
+  print(summary(lm(TempData$GenomeLength ~ TempData$DloopsLength)))
+}
+
+##############################################################
+############# add PICs
+
+library(ape) # install.packages('ape') 
+
+tree <- read.tree("../../Body/1Raw/mtalign.aln.treefile.rooted")
+
+data = oneSpOneCr[which(as.character(oneSpOneCr$Species) %in% tree$tip.label),]
+row.names(data) = data$Species
+
+df_vec <- as.character(data$Species)
+tree_vec <- tree$tip.label
+
+a <- setdiff(df_vec, tree_vec)
+b <- setdiff(tree_vec, df_vec)
+
+tree2 <- drop.tip(tree, b)
+
+#############################################################
+
+for(taxon in unique(data$TAXON)){
+  TempData = data[data$TAXON == taxon, ]
+  
+  df_vec <- as.character(TempData$Species)
+  tree_vec <- tree$tip.label
+  
+  a <- setdiff(df_vec, tree_vec)
+  b <- setdiff(tree_vec, df_vec)
+  
+  tree2 <- drop.tip(tree, b)
+  
+  
+  print(taxon)
+  print(summary(lm(pic(log2(TempData$GenomeLength), tree2, scaled = FALSE) ~ pic(log2(TempData$DloopsLength), tree2, scaled = FALSE), na.action=na.exclude)))
+}
+
