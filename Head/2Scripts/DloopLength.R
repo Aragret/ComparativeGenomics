@@ -117,7 +117,7 @@ dev.off()
 
 for(taxon in unique(oneSpOneCr$TAXON)){
   TempData = oneSpOneCr[oneSpOneCr$TAXON == taxon, ]
-  print(taxon)
+  print(c(taxon, nrow(TempData)))
   print(summary(lm(TempData$GenomeLength ~ TempData$DloopsLength)))
 }
 
@@ -142,6 +142,7 @@ tree2 <- drop.tip(tree, b)
 #############################################################
 
 for(taxon in unique(data$TAXON)){
+  # taxon = 'Amphibia'
   TempData = data[data$TAXON == taxon, ]
   
   df_vec <- as.character(TempData$Species)
@@ -153,7 +154,7 @@ for(taxon in unique(data$TAXON)){
   tree2 <- drop.tip(tree, b)
   
   
-  print(taxon)
-  print(summary(lm(pic(log2(TempData$GenomeLength), tree2, scaled = FALSE) ~ pic(log2(TempData$DloopsLength), tree2, scaled = FALSE), na.action=na.exclude)))
+  print(c(taxon, nrow(TempData)))
+  print(summary(lm(pic(log2(TempData$GenomeLength), tree2) ~ pic(log2(TempData$DloopsLength), tree2), na.action=na.exclude)))
 }
 
