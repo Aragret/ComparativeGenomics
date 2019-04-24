@@ -141,8 +141,10 @@ tree2 <- drop.tip(tree, b)
 
 #############################################################
 
+library(phytools) #install.packages('phytools')
+
 for(taxon in unique(data$TAXON)){
-  # taxon = 'Amphibia'
+  # taxon = 'Reptilia'
   TempData = data[data$TAXON == taxon, ]
   
   df_vec <- as.character(TempData$Species)
@@ -153,8 +155,18 @@ for(taxon in unique(data$TAXON)){
   
   tree2 <- drop.tip(tree, b)
   
+  if(min(tree2$edge.length) == 0){
+    tree2$edge.length = tree2$edge.length + 0.0000001
+  }
   
   print(c(taxon, nrow(TempData)))
-  print(summary(lm(pic(log2(TempData$GenomeLength), tree2) ~ pic(log2(TempData$DloopsLength), tree2), na.action=na.exclude)))
+  print(summary(lm(pic(log2(TempData$GenomeLength), tree2) ~ pic(log2(TempData$DloopsLength), tree2))))
 }
+
+summary(tree2$edge.length)
+
+which(tree2$edge.length == 0)
+getDescendants(tree2, 2252)
+
+summary(lm(pic(log2(data$GenomeLength), tree2) ~ pic(log2(data$DloopsLength), tree2)))
 
