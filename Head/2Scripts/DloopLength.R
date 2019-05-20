@@ -121,6 +121,11 @@ for(taxon in unique(oneSpOneCr$TAXON)){
   print(summary(lm(TempData$GenomeLength ~ TempData$DloopsLength)))
 }
 
+# without multiple dloops
+
+########################## check out later !
+withUniqueDloop = oneSpOneCr[!which(oneSpOneCr$Species %in% oneSpOneCr$Species),]
+
 ##############################################################
 ############# add PICs
 
@@ -138,10 +143,11 @@ a <- setdiff(df_vec, tree_vec)
 b <- setdiff(tree_vec, df_vec)
 
 tree2 <- drop.tip(tree, b)
+tree2$edge.length = tree2$edge.length + 0.0001 # num from Konstantin
 
 #############################################################
 
-library(phytools) #install.packages('phytools')
+# library(phytools) #install.packages('phytools')
 
 for(taxon in unique(data$TAXON)){
   # taxon = 'Reptilia'
@@ -153,20 +159,16 @@ for(taxon in unique(data$TAXON)){
   a <- setdiff(df_vec, tree_vec)
   b <- setdiff(tree_vec, df_vec)
   
-  tree2 <- drop.tip(tree, b)
-  
-  if(min(tree2$edge.length) == 0){
-    tree2$edge.length = tree2$edge.length + 0.0000001
-  }
-  
+  TempTree <- drop.tip(tree2, b)
+
   print(c(taxon, nrow(TempData)))
-  print(summary(lm(pic(log2(TempData$GenomeLength), tree2) ~ pic(log2(TempData$DloopsLength), tree2))))
+  print(summary(lm(pic(log2(TempData$GenomeLength), TempTree) ~ pic(log2(TempData$DloopsLength), TempTree))))
 }
 
-summary(tree2$edge.length)
+# summary(tree2$edge.length)
 
 which(tree2$edge.length == 0)
-getDescendants(tree2, 2252)
+# getDescendants(tree2, 2252)
 
-summary(lm(pic(log2(data$GenomeLength), tree2) ~ pic(log2(data$DloopsLength), tree2)))
+# summary(lm(pic(log2(data$GenomeLength), tree2) ~ pic(log2(data$DloopsLength), tree2)))
 
