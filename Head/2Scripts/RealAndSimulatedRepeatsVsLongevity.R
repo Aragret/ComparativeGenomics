@@ -75,21 +75,23 @@ maxRho = match(min(VecOfRho), VecOfRho)
 TempData = data[, c('generlen', 'TLOfADRRreal', 'TLOfADRR1')]
 # cor.test(Rep$generlen, Rep$TLOfADRR1, method='spearman')
 TempData[,1] = log2(TempData[,1]); TempData[,2] = log2(TempData[,2]); TempData[,3] = log2(TempData[,3]); 
-contrasts <- as.data.frame(apply(TempData, 2, pic, tree2))
-names(contrasts) = names(TempData)
-cor.test(contrasts$generlen, contrasts$TLOfADRR1, method='spearman')
-cor.test(contrasts$generlen, contrasts$TLOfADRRreal, method='spearman')
+# contrasts <- as.data.frame(apply(TempData, 2, pic, tree2))
+# names(contrasts) = names(TempData)
 
 library(pacman)
-p_load(tibble, dplyr, magrittr, purrr)
+p_load(tibble, dplyr, magrittr, purrr, skimr)
 contrasts <- data %>% 
   select(generlen, TLOfADRRreal, TLOfADRR1) %>% 
   mutate_if(is.numeric, log2) %>% 
   map(pic, tree2)
 
+data %>% skim()
 
 summary(contrasts$generlen)
 summary(pic(log2(data$generlen), tree2))
+
+cor.test(contrasts$generlen, contrasts$TLOfADRR1, method='spearman')
+cor.test(contrasts$generlen, contrasts$TLOfADRRreal, method='spearman')
 
 a = as.data.frame(contrasts)
 # newdata <- subset(contrasts, !(contrasts$generlen > quantile(contrasts$generlen, probs=c(.03, .97))[2] | contrasts$generlen < quantile(contrasts$generlen, probs=c(.01, .99))[1]) ) 
