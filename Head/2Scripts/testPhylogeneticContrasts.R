@@ -36,9 +36,9 @@ cor.test(GenLengthStepIncrease, GcContentMtDnaContinuosIncrease, method = 'spear
 cor.test(GenLengthStepIncrease, GcContentMtDnaStepIncrease, method = 'spearman') # 1 
 
 # PICs
-# data = as.data.frame(list(species, GenLengthStepIncrease, GcContentMtDnaStepIncrease))
+data = as.data.frame(list(species, GenLengthStepIncrease, GcContentMtDnaStepIncrease))
 # data = as.data.frame(list(species, GenLengthContinuosIncrease, GcContentMtDnaStepIncrease))
-data = as.data.frame(list(species, GenLengthContinuosIncrease, GcContentMtDnaContinuosIncrease))
+# data = as.data.frame(list(species, GenLengthContinuosIncrease, GcContentMtDnaContinuosIncrease))
 
 names(data) = c('species', 'feature1', 'feature2')
 treeComputeBranchLength = root(compute.brlen(tree), node = 27) # node of the root = number of species + 1
@@ -61,13 +61,13 @@ b = as.numeric(b)
 ## if both cotrasts are zero - we have to delete them (!!), becuase esentialy it means that both features are not changing at all.
 
 # rank correlation gives too good results!!!! Almost the whole vector consists of zeroes!!! How it is possible
-cor.test(a, b) # 0.9990719
-cor.test(a, b, method = 'spearman') #
-cor.test(a, b, method = 'kendall') # p is the highest
+cor.test(a, b)
+cor.test(a, b, method = 'spearman')
+cor.test(a, b, method = 'kendall') 
 
-cor.test(a[3:25], b[3:25]) # 0.9990719
-cor.test(a[3:25], b[3:25], method = 'spearman') # 0.9990719
-cor.test(a[3:25], b[3:25], method = 'kendall') # 0.9990719
+cor.test(a[3:25], b[3:25])
+cor.test(a[3:25], b[3:25], method = 'spearman') 
+cor.test(a[3:25], b[3:25], method = 'kendall') 
 
 # lm?
 A = lm(a~ 0 + b)
@@ -110,4 +110,4 @@ summary(b)
 summary(contrasts$feature2)
 
 # all contrasts are negative when a vector contains ascending numbers. After rearragment 
-# results in PICs are chanched (simple corr doesn't changed)
+# results in PICs are changed (simple corr doesn't changed)
