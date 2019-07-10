@@ -16,6 +16,7 @@ plot(tree,no.margin=TRUE,edge.width=2); tiplabels()
 plot(tree,no.margin=TRUE,edge.width=2); nodelabels()
 plot(tree,no.margin=TRUE,edge.width=2); tiplabels(); nodelabels()
 
+
 species = c('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z')
 species = rev(species) # to follow the tree: A and B are ancestors and we start vectors from 
 
@@ -42,6 +43,9 @@ data = as.data.frame(list(species, GenLengthStepIncrease, GcContentMtDnaStepIncr
 
 names(data) = c('species', 'feature1', 'feature2')
 treeComputeBranchLength = root(compute.brlen(tree), node = 27) # node of the root = number of species + 1
+# change branch lengths - compute.brlen(tree, c()) (in c() any vector you want)
+# edgelabels(treeComputeBranchLength$edge.length, bg="black", col="white", font=2)
+
 
 a = pic(data$feature1, treeComputeBranchLength); 
 a                           # it starts from the root and goes to shallow nodes
@@ -72,6 +76,29 @@ cor.test(a[3:25], b[3:25], method = 'kendall')
 # lm?
 A = lm(a~ 0 + b)
 summary(A)
+
+
+
+
+############## how to get sisters species
+
+library(geiger)
+
+max_node_number = max(tree$edge)
+min_node_number = length(tree$tip.label) + 1
+
+one_line = c()
+for (i in min_node_number:max_node_number){
+  descendants = tips(tree, i)
+  if (length(descendants) == 2){
+    one_line = rbind(one_line, c(i, descendants))
+  }
+}
+
+sisters = as.data.frame(one_line)
+names(sisters) = c('NodeNumber', 'Species1', 'Species2')
+
+
 
 ############## ALINA's ORIGINAL CODE 
 
