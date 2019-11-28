@@ -11,4 +11,4 @@ AlignIO.write(alignment, sys.argv[1] + '.sorted', 'clustal')
 
 subprocess.call("seqkit sort --quiet -i {0} > {1}".format(sys.argv[2], sys.argv[2] + '.sorted'), shell=True)
 
-subprocess.call('perl pal2nal.pl -codontable 5 {0} {1} > {2}'.format(sys.argv[1] + '.sorted', sys.argv[2] + '.sorted', sys.argv[2] + '.codons'), shell=True)
+subprocess.call('perl pal2nal.pl -codontable 2 {0} {1} > {2}'.format(sys.argv[1] + '.sorted', sys.argv[2] + '.sorted', sys.argv[2] + '.codons'), shell=True)
