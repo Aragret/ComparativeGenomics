@@ -1,0 +1,105 @@
+  rm(list=ls(all=TRUE))
+  
+  ## 1: READ MITOBREAK AND KEEP ONLY MAJOR ARC DELETIONS:
+  breaks = read.table("../../Body/1Raw/MitoBreakDB_12122019.csv", sep = ',', header = TRUE)
+  breaks$X5..breakpoint = as.numeric(as.character(breaks$X5..breakpoint)); summary(breaks$X5..breakpoint)
+  breaks$X3..breakpoint = as.numeric(as.character(breaks$X3..breakpoint)); summary(breaks$X3..breakpoint)
+  breaks = breaks[!is.na(breaks$X3..breakpoint) & !is.na(breaks$X5..breakpoint),]
+  pdf("MitoBreakDeletionsDistribution.R.01.pdf")
+  par(mfrow=c(2,1))
+  hist(breaks$X5..breakpoint, breaks = seq(0, 16600, 100))
+  hist(breaks$X3..breakpoint, breaks = seq(0, 16600, 100))
+  nrow(breaks); breaks = breaks[breaks$Deletion.of.replication.origins == 'None',]; nrow(breaks)
+  breaks = breaks[breaks$Location.of.the.deleted.region == 'Inside the major arc',]; nrow(breaks)
+  summary(breaks$X5..breakpoint)
+  summary(breaks$X3..breakpoint)
+  hist(breaks$X5..breakpoint, breaks = seq(0, 16600, 100))
+  hist(breaks$X3..breakpoint, breaks = seq(0, 16600, 100))
+  # поскольку координаты не такие простые (см ниже) - чтобы не париться можно взять все точки разрыва что больше чем 5781 и меньше чем 16569
+  # OH: 110-441
+  # OL: 5721-5781
+  for (i in 1:nrow(breaks))
+  {  
+    if (breaks$X5..breakpoint[i] < 110) {breaks$X5..breakpoint[i] = breaks$X5..breakpoint[i] + 16569}
+    if (breaks$X3..breakpoint[i] < 110) {breaks$X3..breakpoint[i] = breaks$X3..breakpoint[i] + 16569}
+  }
+  summary(breaks$X5..breakpoint)
+  summary(breaks$X3..breakpoint)
+  
+  nrow(breaks); breaks = breaks[breaks$X5..breakpoint > 5781 & breaks$X3..breakpoint > 5781,]; nrow(breaks)
+  summary(breaks$X5..breakpoint)
+  summary(breaks$X3..breakpoint)
+  hist(breaks$X5..breakpoint, breaks = seq(0, 16700, 100))
+  hist(breaks$X3..breakpoint, breaks = seq(0, 16700, 100))
+  
+  ## 2A: COMPARE OBSERVED CENTERS AND EXPECTED (PERMUTTED) CENTERS - IF OBSERVED NARROWER? NO
+  Table = as.data.frame(table(breaks$X3..breakpoint)); Table=Table[order(-Table$Freq),] #
+  #16072	48
+  #16071	41
+  #16073	30
+  #16075	20
+  #16070	16
+  #16074	14
+  #16078	14
+  
+  breaks$ObservedCenter = breaks$X5..breakpoint + (breaks$X3..breakpoint - breaks$X5..breakpoint)/2
+  summary(breaks$ObservedCenter)
+  breaks$PermuttedX3 = sample(breaks$X3..breakpoint)
+  breaks$ExpectedCenter = breaks$X5..breakpoint + (breaks$PermuttedX3 - breaks$X5..breakpoint)/2
+  summary(breaks$ExpectedCenter)
+  hist(breaks$ObservedCenter, breaks = seq(0, 16700, 100))
+  hist(breaks$ExpectedCenter, breaks = seq(0, 16700, 100))
+  VecOfVariance = sd(breaks$ObservedCenter)/mean(breaks$ObservedCenter)
+  for (i in 1:100)
+  {
+    breaks$PermuttedX3 = sample(breaks$X3..breakpoint)
+    breaks$ExpectedCenter = breaks$X5..breakpoint + (breaks$PermuttedX3 - breaks$X5..breakpoint)/2
+    VecOfVariance = c(VecOfVariance,sd(breaks$ExpectedCenter)/mean(breaks$ExpectedCenter))
+  }
+  length(VecOfVariance)
+  par(mfrow=c(1,1))
+  hist(VecOfVariance[2:101])
+  abline(v=VecOfVariance[1], col='red')
+  
+  ## 2B: PLOT CENTER AND LENGTH OF DELETIONS - IS THERE CLUSTERING? YES, HOW TO DRAW IT, CLUSTERS DO NOT CROSS WITH EACH OTHER, CLUSTERS CAN SHOW 3D STRUCTURE
+  par(mfrow=c(1,1))
+  breaks$length = breaks$X3..breakpoint - breaks$X5..breakpoint 
+  plot(breaks$ObservedCenter,breaks$length)
+  
+  ## 3A: SPLIT ALL DELETIONS INTO DIFFERENT CATEGORIES ANS RUN ANALYSIS ONCE MORE:
+  
+  # breaks = breaks[breaks$Healthy.tissues == 'Aged tissues',]; nrow(breaks) # 175
+  # breaks = breaks[breaks$Multiple.mtDNA.deletions ==  "Patients with pathogenic POLG (...)",]
+  # breaks = breaks[breaks$Multiple.mtDNA.deletions !=  "ad/ar-PEO",]
+  breaks = breaks[breaks$Multiple.mtDNA.deletions ==  "ad/ar-PEO",]
+  
+  breaks$ObservedCenter = breaks$X5..breakpoint + (breaks$X3..breakpoint - breaks$X5..breakpoint)/2
+  summary(breaks$ObservedCenter)
+  breaks$PermuttedX3 = sample(breaks$X3..breakpoint)
+  breaks$PermuttedX5 = sample(breaks$X5..breakpoint)
+  breaks$ExpectedCenter = breaks$PermuttedX5 + (breaks$PermuttedX3 - breaks$PermuttedX5)/2
+  summary(breaks$ExpectedCenter)
+  hist(breaks$ObservedCenter, breaks = seq(0, 16700, 100))
+  hist(breaks$ExpectedCenter, breaks = seq(0, 16700, 100))
+  VecOfVariance = sd(breaks$ObservedCenter)/mean(breaks$ObservedCenter)
+  for (i in 1:100)
+  {
+    breaks$PermuttedX3 = sample(breaks$X3..breakpoint)
+    breaks$PermuttedX5 = sample(breaks$X5..breakpoint)
+    breaks$ExpectedCenter = breaks$PermuttedX5 + (breaks$PermuttedX3 - breaks$PermuttedX5)/2
+    VecOfVariance = c(VecOfVariance,sd(breaks$ExpectedCenter)/mean(breaks$ExpectedCenter))
+  }
+  length(VecOfVariance)
+  par(mfrow=c(1,1))
+  hist(VecOfVariance[2:101])
+  abline(v=VecOfVariance[1], col='red')
+  
+  ## 3B: PLOT CENTER AND LENGTH OF DELETIONS - IS THERE CLUSTERING?
+  par(mfrow=c(1,1))
+  breaks$length = breaks$X3..breakpoint - breaks$X5..breakpoint 
+  plot(breaks$ObservedCenter,breaks$length)
+  
+  dev.off()
+  
+  
+  
