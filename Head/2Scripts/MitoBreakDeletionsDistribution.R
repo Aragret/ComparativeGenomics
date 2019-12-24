@@ -64,8 +64,13 @@
   ## 2B: PLOT CENTER AND LENGTH OF DELETIONS - IS THERE CLUSTERING? YES, HOW TO DRAW IT, CLUSTERS DO NOT CROSS WITH EACH OTHER, CLUSTERS CAN SHOW 3D STRUCTURE
   par(mfrow=c(1,1))
   breaks$length = breaks$X3..breakpoint - breaks$X5..breakpoint 
-  plot(breaks$ObservedCenter,breaks$length)
   
+  plot(breaks$X3..breakpoint,breaks$X5..breakpoint, col = rgb(0.5,0.5,0.5,0.4), pch = 16)
+  
+  plot(breaks$ObservedCenter,breaks$length, col = rgb(0.5,0.5,0.5,0.4), pch = 16)
+  plot(breaks[breaks$Multiple.mtDNA.deletions != 'Patients with pathogenic POLG (...)',]$ObservedCenter,breaks[breaks$Multiple.mtDNA.deletions != 'Patients with pathogenic POLG (...)',]$length, col = rgb(0.5,0.5,0.5,0.4), pch = 16)
+  plot(breaks[breaks$Healthy.tissues == 'Aged tissues',]$ObservedCenter,breaks[breaks$Healthy.tissues == 'Aged tissues',]$length, col = rgb(0.5,0.5,0.5,0.4), pch = 16)
+
   ## 3A: SPLIT ALL DELETIONS INTO DIFFERENT CATEGORIES ANS RUN ANALYSIS ONCE MORE:
   
   # breaks = breaks[breaks$Healthy.tissues == 'Aged tissues',]; nrow(breaks) # 175
