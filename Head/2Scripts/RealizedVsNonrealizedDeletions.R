@@ -1,5 +1,8 @@
 rm(list=ls(all=TRUE))
-  
+
+library(ggplot2)
+library(ggpubr)
+
 ### 1: READ VICTOR's FILE 
 Rep = read.table("../../Body/2Derived/Homo_sapiens_triangles.txt", sep = "\t", header = FALSE)
 names(Rep)=c('DelStart','DelEnd','DelLength','MasterRepeat','AlternRepeats1','AlternRepeats2','AlternRepeats3','AlternRepeats4')
@@ -88,5 +91,24 @@ boxplot(Rep$LengthOfRealizedRepeats,Rep$LengthOfNonRealizedRepats, notch = TRUE,
 plot(FinalAllRep[FinalAllRep$RealisedRepeat == 'non_del',]$RepStart,FinalAllRep[FinalAllRep$RealisedRepeat == 'non_del',]$RepEnd, pch = 16, col = "grey", xlim = c(5781,16569), ylim=c(16569,5781), xlab = '', ylab = '')
 par(new=TRUE)
 plot(FinalAllRep[FinalAllRep$RealisedRepeat == 'mb_del',]$RepStart,FinalAllRep[FinalAllRep$RealisedRepeat == 'mb_del',]$RepEnd, pch = 16, col = "red", xlim = c(5781,16569), ylim=c(16569,5781), xlab = 'Start', ylab = 'End')
+
+sp = ggplot(FinalAllRep) +
+  geom_point(aes(RepStart, RepEnd, col=RealisedRepeat)) +
+  scale_fill_manual(values=c("#404080", "#69b3a2")) + scale_x_reverse()
+
+xplot <- ggplot(FinalAllRep, aes(RepStart, fill = RealisedRepeat)) +
+  geom_histogram(alpha=0.4, position = 'dodge') + scale_x_reverse()
+
+yplot <- ggplot(FinalAllRep, aes(RepEnd, fill = RealisedRepeat)) +
+  geom_histogram(alpha=0.4, position = 'dodge') + coord_flip()
+
+# Cleaning the plots
+
+# Arranging the plot
+ggarrange(xplot, NULL, sp, yplot, 
+          ncol = 2, nrow = 2,  align = "hv", 
+          widths = c(2, 1), heights = c(1, 2),
+          common.legend = TRUE)
+
 
 dev.off()
