@@ -1,11 +1,12 @@
   rm(list=ls(all=TRUE))
+  pdf("../../Body/4Figures/MitoBreakDeletionsDistribution.R.01.pdf")
   
   ## 1: READ MITOBREAK AND KEEP ONLY MAJOR ARC DELETIONS:
   breaks = read.table("../../Body/1Raw/MitoBreakDB_12122019.csv", sep = ',', header = TRUE)
   breaks$X5..breakpoint = as.numeric(as.character(breaks$X5..breakpoint)); summary(breaks$X5..breakpoint)
   breaks$X3..breakpoint = as.numeric(as.character(breaks$X3..breakpoint)); summary(breaks$X3..breakpoint)
   breaks = breaks[!is.na(breaks$X3..breakpoint) & !is.na(breaks$X5..breakpoint),]
-  pdf("MitoBreakDeletionsDistribution.R.01.pdf")
+  
   par(mfrow=c(2,1))
   hist(breaks$X5..breakpoint, breaks = seq(0, 16600, 100))
   hist(breaks$X3..breakpoint, breaks = seq(0, 16600, 100))
@@ -48,6 +49,9 @@
   breaks$ExpectedCenter = breaks$X5..breakpoint + (breaks$PermuttedX3 - breaks$X5..breakpoint)/2
   summary(breaks$ExpectedCenter)
   hist(breaks$ObservedCenter, breaks = seq(0, 16700, 100))
+  hist(breaks$ObservedCenter, breaks = seq(0, 16700, 300), xlim = c(7000,15000), col = 'light gray')
+  abline(v=median(breaks$ObservedCenter), col = 'red', lwd=4)
+  median(breaks$ObservedCenter) # 11605
   hist(breaks$ExpectedCenter, breaks = seq(0, 16700, 100))
   VecOfVariance = sd(breaks$ObservedCenter)/mean(breaks$ObservedCenter)
   for (i in 1:100)
