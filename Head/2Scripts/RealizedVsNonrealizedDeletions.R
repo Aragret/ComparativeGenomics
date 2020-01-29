@@ -94,13 +94,18 @@ plot(FinalAllRep[FinalAllRep$RealisedRepeat == 'mb_del',]$RepStart,FinalAllRep[F
 
 sp = ggplot(FinalAllRep) +
   geom_point(aes(RepStart, RepEnd, col=RealisedRepeat)) +
-  scale_fill_manual(values=c("#404080", "#69b3a2")) + scale_x_reverse()
+  #scale_fill_manual(values=c("#404080", "#69b3a2")) + 
+  scale_y_reverse() +
+  theme_minimal() + xlab('Start') + ylab('End')
 
 xplot <- ggplot(FinalAllRep, aes(RepStart, fill = RealisedRepeat)) +
-  geom_histogram(alpha=0.4, position = 'dodge') + scale_x_reverse()
+  geom_histogram(alpha=0.4, position = 'dodge') + theme_minimal() +
+  scale_fill_discrete(name = "Deletions", labels = c("Realized", "Non-realized")) +
+  xlab('') + ylab('')
 
 yplot <- ggplot(FinalAllRep, aes(RepEnd, fill = RealisedRepeat)) +
-  geom_histogram(alpha=0.4, position = 'dodge') + coord_flip()
+  geom_histogram(alpha=0.4, position = 'dodge') + coord_flip() + scale_x_reverse() +
+  theme_minimal() + xlab('') + ylab('')
 
 # Cleaning the plots
 
