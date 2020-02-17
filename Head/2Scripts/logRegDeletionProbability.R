@@ -113,6 +113,63 @@ summary(glm(data$Deletions ~ data$Stability + data$Bublik, family = binomial()))
 #   data$Stability   1.7240     1.0935   1.577    0.115    
 # data$Bublik1     2.2633     0.2136  10.594   <2e-16 ***
 
+#########################################################################
+# data from Kristina
+
+alignScore = read.table('~/Downloads/score_out_matrix')
+
+row.names(alignScore) = c(1:100)*100 + 5800
+names(alignScore) = row.names(alignScore)
+
+one_line = c()
+for(j in 1:ncol(alignScore)){
+  for(i in 1:nrow(alignScore)){
+    # i = 1
+    # j = 1
+    xbegin = as.integer(row.names(alignScore)[i])
+    ybegin = as.integer(sub('X', '', colnames(alignScore)[j]))
+    xend = as.integer(row.names(alignScore)[i + 1])
+    yend = as.integer(sub('X', '', colnames(alignScore)[j + 1]))
+    value = alignScore[i,j]
+    if(xbegin >= ybegin){
+      if(any(mtBreak$X3..breakpoint > xbegin & mtBreak$X3..breakpoint < xend, na.rm = TRUE) &
+         any(mtBreak$X5..breakpoint > ybegin & mtBreak$X5..breakpoint < yend, na.rm = TRUE)){
+        one_line = rbind(one_line, c(ybegin, xbegin, value, 1))
+      }
+      else{one_line = rbind(one_line, c(ybegin, xbegin, value, 0))}
+    }
+  }
+}
+
+data = as.data.frame(one_line)
+names(data) = c('X5', 'X3', 'Stability', 'Deletions')
+
+summary(data$Deletions)
+
+for(i in 1:nrow(data)){
+  # i = 1
+  begin = data[i,]$X5
+  end = data[i,]$X3
+  if(begin >= 6000 & begin <= 9000 & end >= 13000 & end <= 16000){
+    data[i, 'Bublik'] = 1
+  }
+  else{data[i, 'Bublik'] = 0}
+}
+
+data$Deletions = as.factor(data$Deletions)
+summary(data$Deletions)
+# 0    1 
+# 1619  3431
+
+data$Bublik = as.factor(data$Bublik)
+
+summary(glm(data$Deletions ~ data$Stability + data$Bublik, family = binomial()))
+
+# Coefficients:
+#   Estimate Std. Error z value Pr(>|z|)    
+# (Intercept)     0.7332800  0.0588377  12.463  < 2e-16 ***
+#   data$Stability -0.0025356  0.0004932  -5.141 2.74e-07 ***
+#   data$Bublik1    2.8286959  0.1856320  15.238  < 2e-16 ***
 
 #########################################################################
 # number of deletions
