@@ -262,6 +262,7 @@ a<-glm(HomologyAndRepeats$Deletion ~ HomologyAndRepeats$MicroHomologyScore, fami
 HomologyAndRepeats$Residuals = residuals(a)
 summary(HomologyAndRepeats$Residuals)
 
+cor.test(HomologyAndRepeats$Residuals,HomologyAndRepeats$GlobalFoldingScore, method = 'spearman') # nothing
 
 
 
