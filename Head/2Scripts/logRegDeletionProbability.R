@@ -73,9 +73,9 @@ for(j in 1:ncol(a)){
     xend = as.integer(row.names(a)[i + 1])
     yend = as.integer(sub('X', '', colnames(a)[j + 1]))
     value = a[i,j]
-    if(xbegin >= ybegin){
-      if(any(mtBreak$X3..breakpoint >= xbegin & mtBreak$X3..breakpoint <= xend &
-         mtBreak$X5..breakpoint >= ybegin & mtBreak$X5..breakpoint <= yend, na.rm = TRUE)){
+    if(xbegin > ybegin){
+      TempBreaks = mtBreak[mtBreak$X3..breakpoint >= xbegin & mtBreak$X3..breakpoint < xend & mtBreak$X5..breakpoint >= ybegin & mtBreak$X5..breakpoint < yend,]
+      if (nrow(TempBreaks) > 0){
         one_line = rbind(one_line, c(ybegin, xbegin, value, 1))
       }
       else{one_line = rbind(one_line, c(ybegin, xbegin, value, 0))}
@@ -121,6 +121,8 @@ alignScore = read.table('~/Downloads/score_out_matrix')
 row.names(alignScore) = c(1:100)*100 + 5800
 names(alignScore) = row.names(alignScore)
 
+mtBreak = mtBreak[!is.na(mtBreak$X3..breakpoint) & !is.na(mtBreak$X5..breakpoint),]
+
 one_line = c()
 for(j in 1:ncol(alignScore)){
   for(i in 1:nrow(alignScore)){
@@ -131,9 +133,9 @@ for(j in 1:ncol(alignScore)){
     xend = as.integer(row.names(alignScore)[i + 1])
     yend = as.integer(sub('X', '', colnames(alignScore)[j + 1]))
     value = alignScore[i,j]
-    if(xbegin >= ybegin){
-      if(any(mtBreak$X3..breakpoint > xbegin & mtBreak$X3..breakpoint < xend, na.rm = TRUE) &
-         any(mtBreak$X5..breakpoint > ybegin & mtBreak$X5..breakpoint < yend, na.rm = TRUE)){
+    if(xbegin > ybegin){
+      TempBreaks = mtBreak[mtBreak$X3..breakpoint >= xbegin & mtBreak$X3..breakpoint < xend & mtBreak$X5..breakpoint >= ybegin & mtBreak$X5..breakpoint < yend,]
+      if (nrow(TempBreaks) > 0){
         one_line = rbind(one_line, c(ybegin, xbegin, value, 1))
       }
       else{one_line = rbind(one_line, c(ybegin, xbegin, value, 0))}
@@ -167,9 +169,9 @@ summary(glm(data$Deletions ~ data$Stability + data$Bublik, family = binomial()))
 
 # Coefficients:
 #   Estimate Std. Error z value Pr(>|z|)    
-# (Intercept)     0.7332800  0.0588377  12.463  < 2e-16 ***
-#   data$Stability -0.0025356  0.0004932  -5.141 2.74e-07 ***
-#   data$Bublik1    2.8286959  0.1856320  15.238  < 2e-16 ***
+# (Intercept)    -4.626643   0.285132 -16.226  < 2e-16 ***
+#   data$Stability  0.017927   0.002902   6.177 6.51e-10 ***
+#   data$Bublik1    2.417475   0.101838  23.738  < 2e-16 ***
 
 #########################################################################
 # number of deletions
