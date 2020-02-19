@@ -214,11 +214,10 @@ summary(InvRepDens$FirstWindow)  # 6000 15800
 summary(InvRepDens$SecondWindow) # 5900 15700
 names(InvRepDens)[3] = c('InvRepDensScore');
 
-###### 7: CORRELATE GlobalFolding$Score and InvRepDens$Score - nothing, why? how we define inverted repeats density? is everything ok?
+###### 7: CORRELATE GlobalFolding$Score and InvRepDens$Score - weak positive!
 merged = merge(InvRepDens,GlobalFolding, by = c("FirstWindow","SecondWindow"))
 summary(merged$FirstWindow)  # 6000 15800
 summary(merged$SecondWindow) # 5900 15700
-
 cor.test(merged$InvRepDensScore,merged$GlobalFoldingScore, method = 'spearman') # rho = 0.04716305, p-value = 0.0009027
 
 ###### 8: ADD InfinitySign parameter into HomologyAndRepeats dataset:
@@ -229,7 +228,22 @@ for (i in 1:nrow(HomologyAndRepeats))
   {HomologyAndRepeats$InfinitySign[i] = 1}    
 }
 table(HomologyAndRepeats$InfinitySign)
+summary(HomologyAndRepeats$FirstWindow)  # 6000 15800
+summary(HomologyAndRepeats$SecondWindow) # 5900 15700
 
+## merge HomologyAndRepeats with merged(InvRepDens + GlobalFolding)
+dim(HomologyAndRepeats) # 4950
+HomologyAndRepeats = merge(HomologyAndRepeats,merged, by = c("FirstWindow","SecondWindow"))
+dim(HomologyAndRepeats) # 4950
+
+# is GlobalFoldingScore higher within the cross according to our InfinitySign model? NOT significant, may be try 1000 windows? but should be the same.
+wilcox.test(HomologyAndRepeats[HomologyAndRepeats$InfinitySign == 1,]$GlobalFoldingScore,HomologyAndRepeats[HomologyAndRepeats$InfinitySign == 0,]$GlobalFoldingScore)
+t.test(HomologyAndRepeats[HomologyAndRepeats$InfinitySign == 1,]$GlobalFoldingScore,HomologyAndRepeats[HomologyAndRepeats$InfinitySign == 0,]$GlobalFoldingScore)
+summary(HomologyAndRepeats[HomologyAndRepeats$InfinitySign == 1,]$GlobalFoldingScore)
+summary(HomologyAndRepeats[HomologyAndRepeats$InfinitySign == 0,]$GlobalFoldingScore)
+
+# probably we have to link better global folding and InfinitySign model - till now it was done by eye. Clusterisation? One cluster? 
+# dev.off()
 ###### 9: LOGISTIC REGRESSION: HomologyAndRepeats$Deletion as a function of HomologyAndRepeats$MicroHomologyScore and HomologyAndRepeats$InfinitySign:
 
 a<-glm(HomologyAndRepeats$Deletion ~ HomologyAndRepeats$MicroHomologyScore + HomologyAndRepeats$InfinitySign, family = 'binomial')
@@ -237,6 +251,10 @@ summary(a)
 
 a<-glm(HomologyAndRepeats$Deletion ~ scale(HomologyAndRepeats$MicroHomologyScore) + scale(HomologyAndRepeats$InfinitySign), family = 'binomial')
 summary(a)
+
+a<-glm(HomologyAndRepeats$Deletion ~ scale(HomologyAndRepeats$MicroHomologyScore) + scale(HomologyAndRepeats$GlobalFoldingScore), family = 'binomial')
+summary(a) # non significant and negative.
+
 
 # get residuals and correlate them with global matrix
 
