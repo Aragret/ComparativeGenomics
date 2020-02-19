@@ -128,6 +128,37 @@ nrow(Final); Final=Final[Final$FirstWindow > Final$SecondWindow,]; nrow(Final)
 GlobalFolding = Final
 GlobalFolding = GlobalFolding[order(GlobalFolding$FirstWindow,GlobalFolding$SecondWindow),]
 
+##### 5.1: READ GLOBAL FOLDING WITH WINDOW = 100 bp: (it automaticaly rewrites the GlobalFolding matrix from the previous point 5)
+
+GlobalFolding = read.table("../../Body/2Derived/HeatMaps/Link_matrix100hydra_major.csv", sep = ';', header = TRUE)
+row.names(GlobalFolding) = GlobalFolding$X 
+GlobalFolding = GlobalFolding[,-1]
+
+# make long vertical table from the matrix
+for (i in 1:nrow(GlobalFolding))
+{
+  for (j in 1:ncol(GlobalFolding))
+  { # i  = 2; j = 1
+    FirstWindow = as.character(row.names(GlobalFolding)[i])
+    SecondWindow = as.character(names(GlobalFolding)[j])
+    Score = as.numeric(GlobalFolding[i,j])
+    OneLine = data.frame(FirstWindow,SecondWindow,Score)
+    if (i == 1 & j == 1) {Final = OneLine}
+    if (i > 1 | j > 1) {Final = rbind(Final,OneLine)}
+  }
+}
+
+## the matrix is symmetric - I need to keep only one triangle: X>Y (don't need also diagonal, which is made by '500's)
+Final$SecondWindow = gsub('X','',Final$SecondWindow)
+Final$FirstWindow = as.numeric(as.character(Final$FirstWindow)); Final$SecondWindow = as.numeric(Final$SecondWindow); 
+nrow(Final); Final=Final[Final$FirstWindow > Final$SecondWindow,]; nrow(Final)  
+GlobalFolding = Final
+GlobalFolding = GlobalFolding[order(GlobalFolding$FirstWindow,GlobalFolding$SecondWindow),]
+names(GlobalFolding)[3] = c('GlobalFoldingScore');
+
+# GlobalFolding - is the whole genome, not only the major arc!! Keep only major arc in downstream analyses.
+# will do it when merge with InvRepDens.
+
 ###### 6: READ INVERTED REPEATS WITH STEP 1000
 
 InvRepDens = read.table("../../Body/2Derived/HeatMaps/Link_matrix_1000_invert_major_activ_left.csv", sep = ';', header = TRUE)
@@ -155,8 +186,40 @@ nrow(Final); Final=Final[Final$FirstWindow > Final$SecondWindow,]; nrow(Final)
 InvRepDens = Final
 InvRepDens = InvRepDens[order(InvRepDens$FirstWindow,InvRepDens$SecondWindow),]
 
+###### 6.1: READ INVERTED REPEATS WITH STEP 100 bp (it automatically rewrites InvRepDens from previous point 6)
+
+InvRepDens = read.table("../../Body/2Derived/HeatMaps/Link_matrix_invert_major_activ_left.modified.csv", sep = '\t', header = TRUE, row.names = 1) # , row.names = NULL)
+
+# make long vertical table from the matrix
+for (i in 1:nrow(InvRepDens))
+{
+  for (j in 1:ncol(InvRepDens))
+  { # i  = 2; j = 1
+    FirstWindow = as.character(row.names(InvRepDens)[i])
+    SecondWindow = as.character(names(InvRepDens)[j])
+    Score = as.numeric(InvRepDens[i,j])
+    OneLine = data.frame(FirstWindow,SecondWindow,Score)
+    if (i == 1 & j == 1) {Final = OneLine}
+    if (i > 1 | j > 1) {Final = rbind(Final,OneLine)}
+  }
+}
+
+## the matrix is symmetric - I need to keep only one triangle: X>Y (don't need also diagonal, which is made by '500's)
+Final$SecondWindow = gsub('X','',Final$SecondWindow)
+Final$FirstWindow = as.numeric(as.character(Final$FirstWindow)); Final$SecondWindow = as.numeric(Final$SecondWindow); 
+nrow(Final); Final=Final[Final$FirstWindow > Final$SecondWindow,]; nrow(Final)  
+InvRepDens = Final
+InvRepDens = InvRepDens[order(InvRepDens$FirstWindow,InvRepDens$SecondWindow),]
+summary(InvRepDens$FirstWindow)  # 6000 15800
+summary(InvRepDens$SecondWindow) # 5900 15700
+names(InvRepDens)[3] = c('InvRepDensScore');
+
 ###### 7: CORRELATE GlobalFolding$Score and InvRepDens$Score - nothing, why? how we define inverted repeats density? is everything ok?
-cor.test(GlobalFolding$Score,InvRepDens$Score, method = 'spearman') 
+merged = merge(InvRepDens,GlobalFolding, by = c("FirstWindow","SecondWindow"))
+summary(merged$FirstWindow)  # 6000 15800
+summary(merged$SecondWindow) # 5900 15700
+
+cor.test(merged$InvRepDensScore,merged$GlobalFoldingScore, method = 'spearman') # rho = 0.04716305, p-value = 0.0009027
 
 ###### 8: ADD InfinitySign parameter into HomologyAndRepeats dataset:
 HomologyAndRepeats$InfinitySign = 0
