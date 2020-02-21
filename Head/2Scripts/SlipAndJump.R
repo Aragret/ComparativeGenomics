@@ -1,5 +1,7 @@
 rm(list=ls(all=TRUE))
 
+library(raster) # install.packages("raster")
+
 pdf("../../Body/4Figures/SlipAndJump.R.01.pdf")
   
 ##### 1: READ microhomology from pair-wise alignments
@@ -121,12 +123,13 @@ for (i in 1:nrow(GlobalFolding))
   }
 }
 
-## the matrix is symmetric - I need to keep only one triangle: X>Y (don't need also diagonal, which is made by '500's)
+## the matrix is symmetric - I need to keep only one triangle: X>Y (don't need also diagonal, which is noizy and bold)
 Final$SecondWindow = gsub('X','',Final$SecondWindow)
 Final$FirstWindow = as.numeric(as.character(Final$FirstWindow)); Final$SecondWindow = as.numeric(Final$SecondWindow); 
 nrow(Final); Final=Final[Final$FirstWindow > Final$SecondWindow,]; nrow(Final)  
-GlobalFolding = Final
-GlobalFolding = GlobalFolding[order(GlobalFolding$FirstWindow,GlobalFolding$SecondWindow),]
+GlobalFolding1000 = Final
+GlobalFolding1000 = GlobalFolding1000[order(GlobalFolding1000$FirstWindow,GlobalFolding1000$SecondWindow),]
+names(GlobalFolding1000) = c('FirstWindowWholeKbRes','SecondWindowWholeKbRes','GlobalFolding1000Score')
 
 ##### 5.1: READ GLOBAL FOLDING WITH WINDOW = 100 bp: (it automaticaly rewrites the GlobalFolding matrix from the previous point 5)
 
@@ -151,12 +154,14 @@ for (i in 1:nrow(GlobalFolding))
 ## the matrix is symmetric - I need to keep only one triangle: X>Y (don't need also diagonal, which is made by '500's)
 Final$SecondWindow = gsub('X','',Final$SecondWindow)
 Final$FirstWindow = as.numeric(as.character(Final$FirstWindow)); Final$SecondWindow = as.numeric(Final$SecondWindow); 
-nrow(Final); Final=Final[Final$FirstWindow > Final$SecondWindow,]; nrow(Final)  
+nrow(Final); Final=Final[Final$FirstWindow > Final$SecondWindow,]; nrow(Final) 
+# Should we delete bold diagonal or erase it to zeroes??? If delete, dimension will be decreased - try this. delete 5 windows next to diagonal (500)
+nrow(Final); Final=Final[Final$FirstWindow > Final$SecondWindow + 1000,]; nrow(Final) # 500 or 1000!!!!!! similarly good results but 1000 is a bit better
 GlobalFolding = Final
 GlobalFolding = GlobalFolding[order(GlobalFolding$FirstWindow,GlobalFolding$SecondWindow),]
 names(GlobalFolding)[3] = c('GlobalFoldingScore');
 
-# GlobalFolding - is the whole genome, not only the major arc!! Keep only major arc in downstream analyses.
+# GlobalFolding - is the whole genome without bold diagonal, not only the major arc!! Keep only major arc in downstream analyses.
 # will do it when merge with InvRepDens.
 
 ###### 6: READ INVERTED REPEATS WITH STEP 1000
@@ -216,9 +221,9 @@ names(InvRepDens)[3] = c('InvRepDensScore');
 
 ###### 7: CORRELATE GlobalFolding$Score and InvRepDens$Score - weak positive!
 merged = merge(InvRepDens,GlobalFolding, by = c("FirstWindow","SecondWindow"))
-summary(merged$FirstWindow)  # 6000 15800
-summary(merged$SecondWindow) # 5900 15700
-cor.test(merged$InvRepDensScore,merged$GlobalFoldingScore, method = 'spearman') # rho = 0.04716305, p-value = 0.0009027
+summary(merged$FirstWindow)  # diag 500: 6500 15800; diag 1000: 7000 - 15800
+summary(merged$SecondWindow) # diag 500: 5900 15200; diag 1000: 5900 14700
+cor.test(merged$InvRepDensScore,merged$GlobalFoldingScore, method = 'spearman') # diag 500: rho = 0.04926082, p-value = 0.0009922; diag 1000: rho = 0.04945796, p = 0.001743
 
 ###### 8: ADD InfinitySign parameter into HomologyAndRepeats dataset:
 HomologyAndRepeats$InfinitySign = 0
@@ -234,15 +239,16 @@ summary(HomologyAndRepeats$SecondWindow) # 5900 15700
 ## merge HomologyAndRepeats with merged(InvRepDens + GlobalFolding)
 dim(HomologyAndRepeats) # 4950
 HomologyAndRepeats = merge(HomologyAndRepeats,merged, by = c("FirstWindow","SecondWindow"))
-dim(HomologyAndRepeats) # 4950
+dim(HomologyAndRepeats) # diag 500: 4465; diag 1000:  4005
 
-# is GlobalFoldingScore higher within the cross according to our InfinitySign model? NOT significant, may be try 1000 windows? but should be the same.
-wilcox.test(HomologyAndRepeats[HomologyAndRepeats$InfinitySign == 1,]$GlobalFoldingScore,HomologyAndRepeats[HomologyAndRepeats$InfinitySign == 0,]$GlobalFoldingScore)
-t.test(HomologyAndRepeats[HomologyAndRepeats$InfinitySign == 1,]$GlobalFoldingScore,HomologyAndRepeats[HomologyAndRepeats$InfinitySign == 0,]$GlobalFoldingScore)
-summary(HomologyAndRepeats[HomologyAndRepeats$InfinitySign == 1,]$GlobalFoldingScore)
-summary(HomologyAndRepeats[HomologyAndRepeats$InfinitySign == 0,]$GlobalFoldingScore)
+# is GlobalFoldingScore higher within the cross according to our InfinitySign model? YES!!! 
+wilcox.test(HomologyAndRepeats[HomologyAndRepeats$InfinitySign == 1,]$GlobalFoldingScore,HomologyAndRepeats[HomologyAndRepeats$InfinitySign == 0,]$GlobalFoldingScore)# diag 1000: 3.358e-09
+boxplot(HomologyAndRepeats[HomologyAndRepeats$InfinitySign == 1,]$GlobalFoldingScore,HomologyAndRepeats[HomologyAndRepeats$InfinitySign == 0,]$GlobalFoldingScore, notch = TRUE, names = c('stem','loop'), ylab = 'in silico folding score', outline = FALSE)
+t.test(HomologyAndRepeats[HomologyAndRepeats$InfinitySign == 1,]$GlobalFoldingScore,HomologyAndRepeats[HomologyAndRepeats$InfinitySign == 0,]$GlobalFoldingScore) # diag 1000: 0.002639
+summary(HomologyAndRepeats[HomologyAndRepeats$InfinitySign == 1,]$GlobalFoldingScore) # diag 1000: 0.3893
+summary(HomologyAndRepeats[HomologyAndRepeats$InfinitySign == 0,]$GlobalFoldingScore) # diag 1000: 0.09755
 
-# probably we have to link better global folding and InfinitySign model - till now it was done by eye. Clusterisation? One cluster? 
+# we have to link better global folding and InfinitySign model - till now it was done by eye. Clusterisation? One cluster? 
 # dev.off()
 ###### 9: LOGISTIC REGRESSION: HomologyAndRepeats$Deletion as a function of HomologyAndRepeats$MicroHomologyScore and HomologyAndRepeats$InfinitySign:
 
@@ -252,9 +258,9 @@ summary(a)
 a<-glm(HomologyAndRepeats$Deletion ~ scale(HomologyAndRepeats$MicroHomologyScore) + scale(HomologyAndRepeats$InfinitySign), family = 'binomial')
 summary(a)
 
-a<-glm(HomologyAndRepeats$Deletion ~ scale(HomologyAndRepeats$MicroHomologyScore) + scale(HomologyAndRepeats$GlobalFoldingScore), family = 'binomial')
-summary(a) # non significant and negative.
-
+a<-glm(HomologyAndRepeats$Deletion ~ HomologyAndRepeats$MicroHomologyScore + HomologyAndRepeats$GlobalFoldingScore, family = 'binomial')
+summary(a) # non significant - may be I have to take it on bigger scale! (1kb without diagonal, because this is global parameter not precise)
+# to reconstruct 100 bp matrix back from 1 kb matrix!!!!! 
 
 # get residuals and correlate them with global matrix
 
@@ -262,8 +268,48 @@ a<-glm(HomologyAndRepeats$Deletion ~ HomologyAndRepeats$MicroHomologyScore, fami
 HomologyAndRepeats$Residuals = residuals(a)
 summary(HomologyAndRepeats$Residuals)
 
-cor.test(HomologyAndRepeats$Residuals,HomologyAndRepeats$GlobalFoldingScore, method = 'spearman') # nothing
+cor.test(HomologyAndRepeats$Residuals,HomologyAndRepeats$GlobalFoldingScore, method = 'spearman') # diag 500: rho = 0.04714374, p = 0.001627; diag 1000: rho = 0.05628272, p = 0.0003658
 
+#### reconstruct Global folding 100 bp back from 1kb resolution (GlobalFolding1000) assuming that global folding can work remotely enough.
+#### another idea - to use a distance from a given cell to closest contact (from global matrix) - so, infinity sign is not zero or one, but continuos!
 
+# round(6600,-3) = 7000; round(6500,-3) = 6000; 
+HomologyAndRepeats$FirstWindowWholeKbRes = round(HomologyAndRepeats$FirstWindow,-3)
+HomologyAndRepeats$SecondWindowWholeKbRes = round(HomologyAndRepeats$SecondWindow,-3)
+table(HomologyAndRepeats$FirstWindowWholeKbRes)
+table(HomologyAndRepeats$SecondWindowWholeKbRes)
+
+nrow(HomologyAndRepeats)  # diag 1000: 4005
+HomologyAndRepeats = merge(HomologyAndRepeats,GlobalFolding1000, by = c("FirstWindowWholeKbRes","SecondWindowWholeKbRes"))
+nrow(HomologyAndRepeats)  # diag 1000: 4005
+
+a<-glm(HomologyAndRepeats$Deletion ~ scale(HomologyAndRepeats$MicroHomologyScore) + scale(HomologyAndRepeats$GlobalFolding1000Score), family = 'binomial')
+summary(a)
+
+# diag 500:
+# Estimate Std. Error z value Pr(>|z|)    
+# (Intercept)                                      -2.13660    0.05004 -42.698  < 2e-16 ***
+# scale(HomologyAndRepeats$MicroHomologyScore)      0.29139    0.04774   6.103 1.04e-09 ***
+# scale(HomologyAndRepeats$GlobalFolding1000Score)  0.07605    0.04477   1.699   0.0894 .  
+
+# diag 1000:
+# Intercept)                                      -2.03721    0.05031 -40.490  < 2e-16 ***
+#  scale(HomologyAndRepeats$MicroHomologyScore)      0.29126    0.04806   6.061 1.35e-09 ***
+#  scale(HomologyAndRepeats$GlobalFolding1000Score)  0.09128    0.04444   2.054     0.04 *  
+
+##### derive distance to the strongest contact: 6500 vs 14500 (see heatmap: global folding 1 kb resolution). Check coordinates once more!!!
+HomologyAndRepeats$DistanceToContact = 0
+for (i in 1:nrow(HomologyAndRepeats))
+{ # i = 1
+  HomologyAndRepeats$DistanceToContact[i] = pointDistance(c(HomologyAndRepeats$FirstWindow[i],HomologyAndRepeats$SecondWindow[i]), c(14550,6550), lonlat = FALSE)  
+}
+summary(HomologyAndRepeats$DistanceToContact)
+HomologyAndRepeats$DistanceToContact = - HomologyAndRepeats$DistanceToContact
+summary(HomologyAndRepeats$DistanceToContact) # the closest: -70; the most distant: -8245
+a<-glm(HomologyAndRepeats$Deletion ~ scale(HomologyAndRepeats$MicroHomologyScore) + scale(HomologyAndRepeats$DistanceToContact), family = 'binomial')
+summary(a)
+# (Intercept)                                  -2.56654    0.07383 -34.760  < 2e-16 ***
+# scale(HomologyAndRepeats$MicroHomologyScore)  0.43224    0.05269   8.203 2.34e-16 ***
+# scale(HomologyAndRepeats$DistanceToContact)   1.24881    0.06520  19.152  < 2e-16 ***
 
 dev.off()  
