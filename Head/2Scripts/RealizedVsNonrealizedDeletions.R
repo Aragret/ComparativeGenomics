@@ -92,20 +92,29 @@ plot(FinalAllRep[FinalAllRep$RealisedRepeat == 'non_del',]$RepStart,FinalAllRep[
 par(new=TRUE)
 plot(FinalAllRep[FinalAllRep$RealisedRepeat == 'mb_del',]$RepStart,FinalAllRep[FinalAllRep$RealisedRepeat == 'mb_del',]$RepEnd, pch = 16, col = "red", xlim = c(5781,16569), ylim=c(16569,5781), xlab = 'Start', ylab = 'End')
 
+
 sp = ggplot(FinalAllRep) +
   geom_point(aes(RepStart, RepEnd, col=RealisedRepeat)) +
   #scale_fill_manual(values=c("#404080", "#69b3a2")) + 
   scale_y_reverse() +
-  theme_minimal() + xlab('Start') + ylab('End')
+  theme_minimal() + xlab('Start') + ylab('End') + # scale_y_continuous(sec.axis = dup_axis(), breaks=c(15000, 12000, 9000, 6000)) +
+  scale_x_continuous(breaks=c(15000, 12000, 9000, 6000), position = 'top') + 
+  # theme(
+  #   axis.text.x = element_blank(),
+  #   axis.text.y = element_blank()) +
+  scale_color_manual(values=c('red', 'grey'))
+
 
 xplot <- ggplot(FinalAllRep, aes(RepStart, fill = RealisedRepeat)) +
   geom_histogram(alpha=0.4, position = 'dodge') + theme_minimal() +
-  scale_fill_discrete(name = "Deletions", labels = c("Realized", "Non-realized")) +
-  xlab('') + ylab('')
+  xlab('') + ylab('') + scale_x_continuous(breaks=c(6000, 9000, 12000, 15000)) +
+  scale_y_continuous(breaks = c(100, 200, 300, 400, 500, 600)) +
+  scale_fill_manual(values=c('red', 'grey'), name = "", labels = c("Realized repeats", "Non-realized repeats"))
 
 yplot <- ggplot(FinalAllRep, aes(RepEnd, fill = RealisedRepeat)) +
-  geom_histogram(alpha=0.4, position = 'dodge') + coord_flip() + scale_x_reverse() +
-  theme_minimal() + xlab('') + ylab('')
+  geom_histogram(alpha=0.4, position = 'dodge') + coord_flip() + scale_x_reverse(breaks=c(15000, 12000, 9000, 6000)) +
+  theme_minimal() + xlab('') + ylab('') + 
+  scale_fill_manual(values=c('red', 'grey'))
 
 # Cleaning the plots
 
@@ -115,5 +124,10 @@ ggarrange(xplot, NULL, sp, yplot,
           widths = c(2, 1), heights = c(1, 2),
           common.legend = TRUE)
 
+wilcox.test(FinalAllRep[FinalAllRep$RealisedRepeat == 'mb_del',]$RepStart, FinalAllRep[FinalAllRep$RealisedRepeat == 'non_del',]$RepStart)
+wilcox.test(FinalAllRep[FinalAllRep$RealisedRepeat == 'mb_del',]$RepEnd, FinalAllRep[FinalAllRep$RealisedRepeat == 'non_del',]$RepEnd)
+
+FinalAllRep$RealisedRepeat = as.factor(FinalAllRep$RealisedRepeat)
+summary(FinalAllRep$RealisedRepeat)
 
 dev.off()
