@@ -219,11 +219,40 @@ summary(InvRepDens$FirstWindow)  # 6000 15800
 summary(InvRepDens$SecondWindow) # 5900 15700
 names(InvRepDens)[3] = c('InvRepDensScore');
 
+###### 6.2: READ INVERTED REPEATS WITH STEP 100 bp WITH OVERLAPS (it automatically rewrites InvRepDens from previous point 6.1)
+# not nice results - use 6.1 
+#InvRepDens = read.table("../../Body/2Derived/HeatMaps/Link_matrix_direct_major_activ_left_cross.KpModifByHand.mtrx", sep = '\t',header = TRUE, row.names = 1) # , row.names = NULL)
+
+# make long vertical table from the matrix
+#for (i in 1:nrow(InvRepDens))
+#{
+#  for (j in 1:ncol(InvRepDens))
+#  { # i  = 2; j = 1
+#    FirstWindow = as.character(row.names(InvRepDens)[i])
+#    SecondWindow = as.character(names(InvRepDens)[j])
+#    Score = as.numeric(InvRepDens[i,j])
+#    OneLine = data.frame(FirstWindow,SecondWindow,Score)
+#    if (i == 1 & j == 1) {Final = OneLine}
+#    if (i > 1 | j > 1) {Final = rbind(Final,OneLine)}
+#  }
+#}
+
+## the matrix is symmetric - I need to keep only one triangle: X>Y (don't need also diagonal)
+#Final$SecondWindow = gsub('X','',Final$SecondWindow)
+#Final$FirstWindow = as.numeric(as.character(Final$FirstWindow)); Final$SecondWindow = as.numeric(Final$SecondWindow); 
+#nrow(Final); Final=Final[Final$FirstWindow > Final$SecondWindow,]; nrow(Final)  
+#InvRepDens = Final
+#InvRepDens = InvRepDens[order(InvRepDens$FirstWindow,InvRepDens$SecondWindow),]
+#summary(InvRepDens$FirstWindow)  # 6000 15800
+#summary(InvRepDens$SecondWindow) # 5900 15700
+#names(InvRepDens)[3] = c('InvRepDensScore');
+
 ###### 7: CORRELATE GlobalFolding$Score and InvRepDens$Score - weak positive!
 merged = merge(InvRepDens,GlobalFolding, by = c("FirstWindow","SecondWindow"))
 summary(merged$FirstWindow)  # diag 500: 6500 15800; diag 1000: 7000 - 15800
 summary(merged$SecondWindow) # diag 500: 5900 15200; diag 1000: 5900 14700
 cor.test(merged$InvRepDensScore,merged$GlobalFoldingScore, method = 'spearman') # diag 500: rho = 0.04926082, p-value = 0.0009922; diag 1000: rho = 0.04945796, p = 0.001743
+nrow(merged) # 4005
 
 ###### 8: ADD InfinitySign parameter into HomologyAndRepeats dataset:
 HomologyAndRepeats$InfinitySign = 0
