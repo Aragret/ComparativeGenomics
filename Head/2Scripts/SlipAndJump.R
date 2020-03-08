@@ -396,8 +396,14 @@ names(HomologyAndRepeats)
 
 pdf("../../Body/4Figures/SlipAndJump.R.02.pdf")
 
-par(mfrow=c(2,1))
-plot(HomologyAndRepeats$LogRegr.ContactPoint.Coord1,HomologyAndRepeats$LogRegr.ContactPoint.AIC)
-plot(HomologyAndRepeats$LogRegr.ContactPoint.Coord2,HomologyAndRepeats$LogRegr.ContactPoint.AIC) 
+par(mfrow=c(2,3))
+
+plot(HomologyAndRepeats$LogRegr.ContactPoint.Coord2,HomologyAndRepeats$LogRegr.ContactPoint.AIC, xlab = 'Start', ylab = 'AIC'); abline(v = 9000, col = 'red', lwd = 1)
+plot(HomologyAndRepeats$LogRegr.ContactPoint.Coord2,HomologyAndRepeats$LogRegr.ContactPoint.Coeff, xlab = 'Start', ylab = 'Coefficient');  abline(v = 9000, col = 'red', lwd = 1)
+plot(HomologyAndRepeats$LogRegr.ContactPoint.Coord2,-log10(HomologyAndRepeats$LogRegr.ContactPoint.PiValue),   xlab = 'Start', ylab = '-log10(p-value)');  abline(v = 9000, col = 'red', lwd = 1)
+
+plot(HomologyAndRepeats$LogRegr.ContactPoint.Coord1,HomologyAndRepeats$LogRegr.ContactPoint.AIC, xlab = 'End', ylab = 'AIC');  abline(v = 13000, col = 'red', lwd = 1)
+plot(HomologyAndRepeats$LogRegr.ContactPoint.Coord1,HomologyAndRepeats$LogRegr.ContactPoint.Coeff, xlab = 'End', ylab = 'Coefficient');  abline(v = 13000, col = 'red', lwd = 1)
+plot(HomologyAndRepeats$LogRegr.ContactPoint.Coord1,-log10(HomologyAndRepeats$LogRegr.ContactPoint.PiValue),  xlab = 'End', ylab = '-log10(p-value)');  abline(v = 13000, col = 'red', lwd = 1)
 
 dev.off()  
