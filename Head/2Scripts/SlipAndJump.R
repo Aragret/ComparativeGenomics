@@ -364,6 +364,7 @@ HomologyAndRepeats$LogRegr.ContactPoint.Coord2 = 0
 HomologyAndRepeats$LogRegr.ContactPoint.PiValue = 0
 HomologyAndRepeats$LogRegr.ContactPoint.Coeff = 0
 HomologyAndRepeats$LogRegr.ContactPoint.AIC = 0
+HomologyAndRepeats$LogRegr.ContactPoint.ResidualDeviance = 0
 
 for (search in 1:nrow(HomologyAndRepeats))
 { # search = 1
@@ -375,7 +376,6 @@ for (i in 1:nrow(HomologyAndRepeats))
 { # i = 1
   HomologyAndRepeats$DistanceToContact[i] = pointDistance(c(HomologyAndRepeats$FirstWindow[i],HomologyAndRepeats$SecondWindow[i]), c(Coord1,Coord2), lonlat = FALSE)  
 }
-summary(HomologyAndRepeats$DistanceToContact)
 summary(HomologyAndRepeats$DistanceToContact) 
 a<-glm(HomologyAndRepeats$Deletion ~ scale(HomologyAndRepeats$MicroHomologyScore) + scale(HomologyAndRepeats$DistanceToContact), family = 'binomial')
 summary(a)
@@ -385,25 +385,27 @@ HomologyAndRepeats$LogRegr.ContactPoint.Coeff[search] = Res[3,1]
 HomologyAndRepeats$LogRegr.ContactPoint.AIC[search] = a$aic
 HomologyAndRepeats$LogRegr.ContactPoint.Coord1[search] = Coord1
 HomologyAndRepeats$LogRegr.ContactPoint.Coord2[search] = Coord2
-
+HomologyAndRepeats$LogRegr.ContactPoint.ResidualDeviance[search] = a$deviance
 }
 
 write.table(HomologyAndRepeats,"../../Body/3Results/SlipAndJump.HomologyAndRepeats.txt", sep = '\t')
 
 HomologyAndRepeats = HomologyAndRepeats[order(HomologyAndRepeats$LogRegr.ContactPoint.AIC),]
 names(HomologyAndRepeats)
-
+summary(HomologyAndRepeats$LogRegr.ContactPoint.ResidualDeviance)
 
 pdf("../../Body/4Figures/SlipAndJump.R.02.pdf")
 
-par(mfrow=c(2,3))
+par(mfrow=c(2,4))
 
-plot(HomologyAndRepeats$LogRegr.ContactPoint.Coord2,HomologyAndRepeats$LogRegr.ContactPoint.AIC, xlab = 'Start', ylab = 'AIC'); abline(v = 9000, col = 'red', lwd = 1)
-plot(HomologyAndRepeats$LogRegr.ContactPoint.Coord2,HomologyAndRepeats$LogRegr.ContactPoint.Coeff, xlab = 'Start', ylab = 'Coefficient');  abline(v = 9000, col = 'red', lwd = 1)
-plot(HomologyAndRepeats$LogRegr.ContactPoint.Coord2,-log10(HomologyAndRepeats$LogRegr.ContactPoint.PiValue),   xlab = 'Start', ylab = '-log10(p-value)');  abline(v = 9000, col = 'red', lwd = 1)
+plot(HomologyAndRepeats$LogRegr.ContactPoint.Coord2,HomologyAndRepeats$LogRegr.ContactPoint.AIC, xlab = '5 prime position', ylab = 'AIC'); abline(v = 9000, col = 'red', lwd = 1); abline(v = 6000, col = 'red', lwd = 1) 
+plot(HomologyAndRepeats$LogRegr.ContactPoint.Coord2,HomologyAndRepeats$LogRegr.ContactPoint.Coeff, xlab = '5 prime position', ylab = 'Coefficient');  abline(v = 9000, col = 'red', lwd = 1); abline(v = 6000, col = 'red', lwd = 1) 
+plot(HomologyAndRepeats$LogRegr.ContactPoint.Coord2,-log10(HomologyAndRepeats$LogRegr.ContactPoint.PiValue),   xlab = '5 prime position', ylab = '-log10(p-value)');  abline(v = 9000, col = 'red', lwd = 1); abline(v = 6000, col = 'red', lwd = 1) 
+plot(HomologyAndRepeats$LogRegr.ContactPoint.Coord2,HomologyAndRepeats$LogRegr.ContactPoint.ResidualDeviance,   xlab = '5 prime position', ylab = 'ResidualDeviance');  abline(v = 9000, col = 'red', lwd = 1); abline(v = 6000, col = 'red', lwd = 1) 
 
-plot(HomologyAndRepeats$LogRegr.ContactPoint.Coord1,HomologyAndRepeats$LogRegr.ContactPoint.AIC, xlab = 'End', ylab = 'AIC');  abline(v = 13000, col = 'red', lwd = 1)
-plot(HomologyAndRepeats$LogRegr.ContactPoint.Coord1,HomologyAndRepeats$LogRegr.ContactPoint.Coeff, xlab = 'End', ylab = 'Coefficient');  abline(v = 13000, col = 'red', lwd = 1)
-plot(HomologyAndRepeats$LogRegr.ContactPoint.Coord1,-log10(HomologyAndRepeats$LogRegr.ContactPoint.PiValue),  xlab = 'End', ylab = '-log10(p-value)');  abline(v = 13000, col = 'red', lwd = 1)
+plot(HomologyAndRepeats$LogRegr.ContactPoint.Coord1,HomologyAndRepeats$LogRegr.ContactPoint.AIC, xlab = '3 prime position', ylab = 'AIC');  abline(v = 13000, col = 'red', lwd = 1); abline(v = 16000, col = 'red', lwd = 1); 
+plot(HomologyAndRepeats$LogRegr.ContactPoint.Coord1,HomologyAndRepeats$LogRegr.ContactPoint.Coeff, xlab = '3 prime position', ylab = 'Coefficient');  abline(v = 13000, col = 'red', lwd = 1); abline(v = 16000, col = 'red', lwd = 1); 
+plot(HomologyAndRepeats$LogRegr.ContactPoint.Coord1,-log10(HomologyAndRepeats$LogRegr.ContactPoint.PiValue),  xlab = '3 prime position', ylab = '-log10(p-value)');  abline(v = 13000, col = 'red', lwd = 1); abline(v = 16000, col = 'red', lwd = 1); 
+plot(HomologyAndRepeats$LogRegr.ContactPoint.Coord1,HomologyAndRepeats$LogRegr.ContactPoint.ResidualDeviance,   xlab = '3 prime position', ylab = 'ResidualDeviance');  abline(v = 13000, col = 'red', lwd = 1); abline(v = 16000, col = 'red', lwd = 1) 
 
 dev.off()  
