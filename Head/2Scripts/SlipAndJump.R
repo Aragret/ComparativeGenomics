@@ -356,6 +356,7 @@ summary(a)
 
 dev.off()  
 
+
 ###### run many log regr in the loop and find the Contact Point with the best AIC 
 
 HomologyAndRepeats$LogRegr.ContactPoint.Coord1 = 0
@@ -391,3 +392,12 @@ write.table(HomologyAndRepeats,"../../Body/3Results/SlipAndJump.HomologyAndRepea
 
 HomologyAndRepeats = HomologyAndRepeats[order(HomologyAndRepeats$LogRegr.ContactPoint.AIC),]
 names(HomologyAndRepeats)
+
+
+pdf("../../Body/4Figures/SlipAndJump.R.02.pdf")
+
+par(mfrow=c(2,1))
+plot(HomologyAndRepeats$LogRegr.ContactPoint.Coord1,HomologyAndRepeats$LogRegr.ContactPoint.AIC)
+plot(HomologyAndRepeats$LogRegr.ContactPoint.Coord2,HomologyAndRepeats$LogRegr.ContactPoint.AIC) 
+
+dev.off()  
