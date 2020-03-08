@@ -355,3 +355,39 @@ summary(a)
 # scale(HomologyAndRepeats$DistanceToContact)   1.24881    0.06520  19.152  < 2e-16 ***
 
 dev.off()  
+
+###### run many log regr in the loop and find the Contact Point with the best AIC 
+
+HomologyAndRepeats$LogRegr.ContactPoint.Coord1 = 0
+HomologyAndRepeats$LogRegr.ContactPoint.Coord2 = 0
+HomologyAndRepeats$LogRegr.ContactPoint.PiValue = 0
+HomologyAndRepeats$LogRegr.ContactPoint.Coeff = 0
+HomologyAndRepeats$LogRegr.ContactPoint.AIC = 0
+
+for (search in 1:nrow(HomologyAndRepeats))
+{ # search = 1
+Coord1 = HomologyAndRepeats$FirstWindow[search]+50  # big numbers
+Coord2 = HomologyAndRepeats$SecondWindow[search]+50 # small numbers
+  
+HomologyAndRepeats$TempDistanceToContact = 0
+for (i in 1:nrow(HomologyAndRepeats))
+{ # i = 1
+  HomologyAndRepeats$DistanceToContact[i] = pointDistance(c(HomologyAndRepeats$FirstWindow[i],HomologyAndRepeats$SecondWindow[i]), c(Coord1,Coord2), lonlat = FALSE)  
+}
+summary(HomologyAndRepeats$DistanceToContact)
+summary(HomologyAndRepeats$DistanceToContact) 
+a<-glm(HomologyAndRepeats$Deletion ~ scale(HomologyAndRepeats$MicroHomologyScore) + scale(HomologyAndRepeats$DistanceToContact), family = 'binomial')
+summary(a)
+Res = as.data.frame(summary(a)$coefficients)
+HomologyAndRepeats$LogRegr.ContactPoint.PiValue[search] = Res[3,4]
+HomologyAndRepeats$LogRegr.ContactPoint.Coeff[search] = Res[3,1]
+HomologyAndRepeats$LogRegr.ContactPoint.AIC[search] = a$aic
+HomologyAndRepeats$LogRegr.ContactPoint.Coord1[search] = Coord1
+HomologyAndRepeats$LogRegr.ContactPoint.Coord2[search] = Coord2
+
+}
+
+write.table(HomologyAndRepeats,"../../Body/3Results/SlipAndJump.HomologyAndRepeats.txt", sep = '\t')
+
+HomologyAndRepeats = HomologyAndRepeats[order(HomologyAndRepeats$LogRegr.ContactPoint.AIC),]
+names(HomologyAndRepeats)
