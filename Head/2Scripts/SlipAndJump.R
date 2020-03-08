@@ -346,13 +346,43 @@ for (i in 1:nrow(HomologyAndRepeats))
   HomologyAndRepeats$DistanceToContact[i] = pointDistance(c(HomologyAndRepeats$FirstWindow[i],HomologyAndRepeats$SecondWindow[i]), c(14550,6550), lonlat = FALSE)  
 }
 summary(HomologyAndRepeats$DistanceToContact)
-HomologyAndRepeats$DistanceToContact = - HomologyAndRepeats$DistanceToContact
 summary(HomologyAndRepeats$DistanceToContact) # the closest: -70; the most distant: -8245
 a<-glm(HomologyAndRepeats$Deletion ~ scale(HomologyAndRepeats$MicroHomologyScore) + scale(HomologyAndRepeats$DistanceToContact), family = 'binomial')
 summary(a)
-# (Intercept)                                  -2.56654    0.07383 -34.760  < 2e-16 ***
-# scale(HomologyAndRepeats$MicroHomologyScore)  0.43224    0.05269   8.203 2.34e-16 ***
-# scale(HomologyAndRepeats$DistanceToContact)   1.24881    0.06520  19.152  < 2e-16 ***
+#Coefficients:
+#  Estimate Std. Error z value Pr(>|z|)    
+#(Intercept)                                    -2.56654    0.07383 -34.760  < 2e-16 ***
+#  scale(HomologyAndRepeats$MicroHomologyScore)  0.43224    0.05269   8.203 2.34e-16 ***
+#  scale(HomologyAndRepeats$DistanceToContact)  -1.24881    0.06520 -19.152  < 2e-16 ***
+#  ---
+#  Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+# (Dispersion parameter for binomial family taken to be 1)
+# Null deviance: 2924.7  on 4004  degrees of freedom
+# Residual deviance: 2402.3  on 4002  degrees of freedom
+# AIC: 2408.3
+
+### derive distance to common repeat:
+HomologyAndRepeats$DistanceToContact = 0
+for (i in 1:nrow(HomologyAndRepeats))
+{ # i = 1
+  HomologyAndRepeats$DistanceToContact[i] = pointDistance(c(HomologyAndRepeats$FirstWindow[i],HomologyAndRepeats$SecondWindow[i]), c(13447,8469), lonlat = FALSE)  #  (8469-8482 - 13447-13459)
+}
+summary(HomologyAndRepeats$DistanceToContact)
+summary(HomologyAndRepeats$DistanceToContact) # the closest: -70; the most distant: -8245
+a<-glm(HomologyAndRepeats$Deletion ~ scale(HomologyAndRepeats$MicroHomologyScore) + scale(HomologyAndRepeats$DistanceToContact), family = 'binomial')
+summary(a)
+#                                             Estimate Std. Error z value Pr(>|z|)    
+#(Intercept)                                  -2.35793    0.06536 -36.077  < 2e-16 ***
+#  scale(HomologyAndRepeats$MicroHomologyScore)  0.27667    0.05038   5.492 3.98e-08 ***
+#  scale(HomologyAndRepeats$DistanceToContact)  -1.00602    0.06878 -14.627  < 2e-16 ***
+#  ---
+#  Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+#
+#(Dispersion parameter for binomial family taken to be 1)
+#
+#Null deviance: 2924.7  on 4004  degrees of freedom
+#Residual deviance: 2609.1  on 4002  degrees of freedom
+#AIC: 2615.1
 
 dev.off()  
 
