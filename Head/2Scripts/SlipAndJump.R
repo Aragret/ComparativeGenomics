@@ -55,7 +55,8 @@ DirectRepDensity = Final
 ##### 3: correlate MicroHomology and  DirectRepDensity, derive HomologyAndRepeats dataset
 DirectRepDensity = DirectRepDensity[order(DirectRepDensity$FirstWindow,DirectRepDensity$SecondWindow),]
 MicroHomology = MicroHomology[order(MicroHomology$FirstWindow,MicroHomology$SecondWindow),]
-cor.test(DirectRepDensity$Score,MicroHomology$Score, method = 'spearman')
+cor.test(DirectRepDensity$Score,MicroHomology$Score, method = 'spearman') # p-value = 1.698e-06, spearman rho = 0.06796994 
+nrow(DirectRepDensity) # 4950
 plot(DirectRepDensity$Score,MicroHomology$Score)
 
 cor.test(DirectRepDensity[DirectRepDensity$Score > 0,]$Score,MicroHomology[DirectRepDensity$Score > 0,]$Score, method = 'spearman')
@@ -94,11 +95,23 @@ table(HomologyAndRepeats$Deletion)
 a<- glm(HomologyAndRepeats$Deletion ~ HomologyAndRepeats$DirectRepeatsDensity + HomologyAndRepeats$MicroHomologyScore, family = binomial) 
 summary(a)
 
-a<- glm(HomologyAndRepeats$Deletion ~ HomologyAndRepeats$DirectRepeatsDensity*HomologyAndRepeats$MicroHomologyScore, family = binomial) 
-summary(a)
-
-a<- glm(HomologyAndRepeats$Deletion ~ HomologyAndRepeats$DirectRepeatsDensity, family = binomial) 
-summary(a) # only density of direct repeats doesn't work. 
+a<- glm(HomologyAndRepeats$Deletion ~ scale(HomologyAndRepeats$MicroHomologyScore), family = binomial) 
+summary(a) 
+#  Coefficients:
+#  Estimate Std. Error z value Pr(>|z|)    
+# (Intercept)                                  -2.25264    0.04914 -45.838  < 2e-16 ***
+#  scale(HomologyAndRepeats$MicroHomologyScore)  0.27442    0.04697   5.843 5.13e-09 ***
+#  ---
+#  Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+#
+# (Dispersion parameter for binomial family taken to be 1)
+#
+# Null deviance: 3169.7  on 4949  degrees of freedom
+# Residual deviance: 3135.9  on 4948  degrees of freedom
+# AIC: 3139.9
+# 
+# Number of Fisher Scoring iterations: 5
+nrow(HomologyAndRepeats)
 
 ### may be add perfect repeats of Orlov - yes or no for each deletion? and see, if microhomology still important?
 
@@ -254,7 +267,7 @@ summary(merged$SecondWindow) # diag 500: 5900 15200; diag 1000: 5900 14700
 cor.test(merged$InvRepDensScore,merged$GlobalFoldingScore, method = 'spearman') # diag 500: rho = 0.04926082, p-value = 0.0009922; diag 1000: rho = 0.04945796, p = 0.001743
 nrow(merged) # 4005
 
-###### 8: ADD InfinitySign parameter into HomologyAndRepeats dataset:
+###### 8: ADD InfinitySign parameter into HomologyAndRepeats dataset (13 - 16 kb vs 6-9 kb):
 HomologyAndRepeats$InfinitySign = 0
 for (i in 1:nrow(HomologyAndRepeats))
 {
@@ -285,7 +298,7 @@ a<-glm(HomologyAndRepeats$Deletion ~ HomologyAndRepeats$MicroHomologyScore + Hom
 summary(a)
 
 a<-glm(HomologyAndRepeats$Deletion ~ scale(HomologyAndRepeats$MicroHomologyScore) + scale(HomologyAndRepeats$InfinitySign), family = 'binomial')
-summary(a)
+summary(a) # PAPER!!! 0.33 + 0.91
 
 a<-glm(HomologyAndRepeats$Deletion ~ HomologyAndRepeats$MicroHomologyScore + HomologyAndRepeats$GlobalFoldingScore, family = 'binomial')
 summary(a) # non significant - may be I have to take it on bigger scale! (1kb without diagonal, because this is global parameter not precise)
