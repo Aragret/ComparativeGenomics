@@ -2,7 +2,7 @@ rm(list=ls(all=TRUE))
 
 library(ggplot2)
 library(ggpubr)
-library(mosaicplot) # install.packages('mosaicplot')
+#library(mosaicplot) # install.packages('mosaicplot')
 
 ### 1: READ VICTOR's FILE 
 Rep = read.table("../../Body/2Derived/Homo_sapiens_triangles.txt", sep = "\t", header = FALSE)
