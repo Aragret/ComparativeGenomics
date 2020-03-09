@@ -426,7 +426,11 @@ HomologyAndRepeats = HomologyAndRepeats[order(HomologyAndRepeats$LogRegr.Contact
 names(HomologyAndRepeats)
 summary(HomologyAndRepeats$LogRegr.ContactPoint.ResidualDeviance)
 summary(HomologyAndRepeats$LogRegr.ContactPoint.AIC)
+
 temp = HomologyAndRepeats[HomologyAndRepeats$LogRegr.ContactPoint.Coord1 == 11950 & HomologyAndRepeats$LogRegr.ContactPoint.Coord2 == 8950,] 
+temp
+
+
 pdf("../../Body/4Figures/SlipAndJump.R.02.pdf")
 
 par(mfrow=c(2,4))
