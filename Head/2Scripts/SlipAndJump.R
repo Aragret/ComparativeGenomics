@@ -420,6 +420,8 @@ HomologyAndRepeats$LogRegr.ContactPoint.ResidualDeviance[search] = a$deviance
 
 write.table(HomologyAndRepeats,"../../Body/3Results/SlipAndJump.HomologyAndRepeats.txt", sep = '\t')
 
+HomologyAndRepeats = read.table("../../Body/3Results/SlipAndJump.HomologyAndRepeats.txt", sep = '\t')
+
 HomologyAndRepeats = HomologyAndRepeats[order(HomologyAndRepeats$LogRegr.ContactPoint.AIC),]
 names(HomologyAndRepeats)
 summary(HomologyAndRepeats$LogRegr.ContactPoint.ResidualDeviance)
