@@ -49,7 +49,7 @@ plot(Rep[Rep$RepName == 'Direct_repeat',]$RepEnd,Rep[Rep$RepName == 'Direct_repe
 par(new= TRUE)
 plot(Rep[Rep$RepName == 'Invert_repeat',]$RepEnd,Rep[Rep$RepName == 'Invert_repeat',]$RepStart, xlim = c(5781,16569), ylim=c(16569,5781), col = rgb(0.1,1,0.1,0.5), pch = 16, xlab = '5\'breakpoint',  ylab = '3\'breakpoint')
 
-legend(12000, 8000, c('deletions','DirRep'), col=c(rgb(0.5,0.5,0.5,0.5),rgb(1,0.1,0.1,0.5),rgb(0.1,1,0.1,0.5)), pch = 16)
+legend(12000, 8000, c('deletions','DirRep','InvRep'), col=c(rgb(0.5,0.5,0.5,0.5),rgb(1,0.1,0.1,0.5),rgb(0.1,1,0.1,0.5)), pch = 16)
 # инвертированных повторов, наоборот мало в зоне контакта, и чуть больше на периферии.
 # означает ли это, что они могут делать петли там и эти петли могут привести к перепрыгиванию по прямым повторам?
 # насколько далеко назад вновь синтезированная цепь ДНК может раскручиваться завидев петлю и ища в одноцепочечном состоянии как праймер новое место посадки?
