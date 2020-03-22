@@ -34,14 +34,13 @@ pdf("../../Body/4Figures/MitoBreakDeletionsAndInteractionOfDirectAndInvertedOrlo
   hist(breaks$X5..breakpoint, breaks = seq(0, 16700, 100))
   hist(breaks$X3..breakpoint, breaks = seq(0, 16700, 100))
   
-## 2: read Orlovs's direct and inverted perfect repeats
+## 2: read and plot Orlovs's direct and inverted perfect repeats
   
 Rep = read.table("../../Body/1Raw/Homo_sapiens.input.out4out.SecondPart", header = TRUE, sep = '\t') # 767
 Rep=Rep[Rep$RepName == 'Direct_repeat' | Rep$RepName == 'Invert_repeat',] # 440
 Rep$RepStart = as.numeric(as.character(Rep$RepStart)); Rep$RepEnd = as.numeric(as.character(Rep$RepEnd)); 
 Rep = Rep[Rep$RepStart > 5781 & Rep$RepStart < 16569 & Rep$RepEnd > 5781 & Rep$RepEnd < 16569,] # 207 
 
-## 3: plot inverted repeats and breakpoints
 par(mfrow=c(1,1))
 plot(breaks$X5..breakpoint,breaks$X3..breakpoint,xlim = c(5781,16569), ylim=c(16569,5781), col = rgb(0.5,0.5,0.5,0.2), pch = 16, xlab = '5\'breakpoint',  ylab = '3\'breakpoint')
 par(new= TRUE)
@@ -53,5 +52,35 @@ legend(12000, 8000, c('deletions','DirRep','InvRep'), col=c(rgb(0.5,0.5,0.5,0.5)
 # инвертированных повторов, наоборот мало в зоне контакта, и чуть больше на периферии.
 # означает ли это, что они могут делать петли там и эти петли могут привести к перепрыгиванию по прямым повторам?
 # насколько далеко назад вновь синтезированная цепь ДНК может раскручиваться завидев петлю и ища в одноцепочечном состоянии как праймер новое место посадки?
+
+## 3: read and plot Victors direct and inverted repeats
+
+Rep = read.table("../../Body/1Raw/DegRepsHomo_sapiens 2018_07_02.csv", header = TRUE, sep = ';') 
+Rep = Rep[Rep$id_type == 1 | Rep$id_type == 4,] # 1 = direct, 4 = inverted
+Rep = Rep[Rep$first_start > 5781 & Rep$first_start < 16569 & Rep$second_start > 5781 & Rep$second_start < 16569,] 
+
+par(mfrow=c(1,1))
+plot(breaks$X5..breakpoint,breaks$X3..breakpoint,xlim = c(5781,16569), ylim=c(16569,5781), col = rgb(0.5,0.5,0.5,0.2), pch = 16, xlab = '5\'breakpoint',  ylab = '3\'breakpoint')
+par(new= TRUE)
+plot(Rep[Rep$id_type == 1,]$first_start,Rep[Rep$id_type == 1,]$second_start, xlim = c(5781,16569), ylim=c(16569,5781), col = rgb(1,0.1,0.1,0.5), cex = 0.5, pch = 16, xlab = '5\'breakpoint',  ylab = '3\'breakpoint')
+par(new= TRUE)
+plot(Rep[Rep$id_type == 4,]$first_start,Rep[Rep$id_type == 4,]$second_start, xlim = c(5781,16569), ylim=c(16569,5781), col = rgb(0.1,1,0.1,0.5), cex = 0.5, pch = 16, xlab = '5\'breakpoint',  ylab = '3\'breakpoint')
+legend(12000, 8000, c('deletions','DegrDirRep','DegrInvRep'), col=c(rgb(0.5,0.5,0.5,0.5),rgb(1,0.1,0.1,0.5),rgb(0.1,1,0.1,0.5)), pch = 16)
+
+par(mfrow=c(1,1))
+plot(Rep[Rep$id_type == 1,]$first_start,Rep[Rep$id_type == 1,]$second_start, xlim = c(5781,16569), ylim=c(16569,5781), col = rgb(1,0.1,0.1,0.5), cex = 0.5, pch = 16, xlab = '5\'breakpoint',  ylab = '3\'breakpoint')
+legend(12000, 8000, c('deletions','DegrDirRep','DegrInvRep'), col=c(rgb(0.5,0.5,0.5,0.5),rgb(1,0.1,0.1,0.5),rgb(0.1,1,0.1,0.5)), pch = 16)
+
+par(mfrow=c(1,1))
+plot(Rep[Rep$id_type == 4,]$first_start,Rep[Rep$id_type == 4,]$second_start, xlim = c(5781,16569), ylim=c(16569,5781), col = rgb(0.1,1,0.1,0.5), cex = 0.5, pch = 16, xlab = '5\'breakpoint',  ylab = '3\'breakpoint')
+legend(12000, 8000, c('deletions','DegrDirRep','DegrInvRep'), col=c(rgb(0.5,0.5,0.5,0.5),rgb(1,0.1,0.1,0.5),rgb(0.1,1,0.1,0.5)), pch = 16)
+
+VecBreaks = seq(0,17000,100)
+par(mfrow=c(4,1))
+hist(Rep[Rep$id_type == 1,]$first_start, col = rgb(1,0.1,0.1,0.5), xlim = c(5781,16569), breaks = VecBreaks)
+hist(Rep[Rep$id_type == 1,]$second_start, col = rgb(1,0.1,0.1,0.5), xlim = c(16569,5781), breaks = VecBreaks)
+hist(Rep[Rep$id_type == 4,]$first_start, col = rgb(0.1,1,0.1,0.5), xlim = c(5781,16569), breaks = VecBreaks)
+hist(Rep[Rep$id_type == 4,]$second_start, col = rgb(0.1,1,0.1,0.5), xlim = c(16569,5781), breaks = VecBreaks)
+
 
 dev.off()  
