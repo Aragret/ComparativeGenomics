@@ -82,5 +82,8 @@ hist(Rep[Rep$id_type == 1,]$second_start, col = rgb(1,0.1,0.1,0.5), xlim = c(165
 hist(Rep[Rep$id_type == 4,]$first_start, col = rgb(0.1,1,0.1,0.5), xlim = c(5781,16569), breaks = VecBreaks)
 hist(Rep[Rep$id_type == 4,]$second_start, col = rgb(0.1,1,0.1,0.5), xlim = c(16569,5781), breaks = VecBreaks)
 
+## 4. analysis of interaction: DIID - we hope it will be the best, IDDI, DIDI etc: D = Direct, I = inverted 
+
+
 
 dev.off()  
