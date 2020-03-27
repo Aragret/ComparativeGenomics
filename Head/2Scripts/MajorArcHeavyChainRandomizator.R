@@ -17,7 +17,7 @@
   length(RandMajArc)
   for (i in 1:10000) {RandMajArc = sample(RandMajArc)}
   
-  RandMajArc = paste(RandMajArc, collapse = '')
+  RandMajArc = data.frame(paste(RandMajArc, collapse = ''))
   names(RandMajArc) = c('>MajorArcHeavyChainRandomizator.StartFromNucContent.txt')
   write.table(RandMajArc,"../../Body/2Derived/MajorArcHeavyChainRandomizator.StartFromNucContent.txt", row.names = FALSE, quote = FALSE)
   
