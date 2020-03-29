@@ -144,7 +144,6 @@ CD=as.data.frame(table(DirRep[DirRep$ContactZone == 1 & DirRep$InvertedInside ==
 X = cbind(CD$Freq,AB$Freq) # (6/34) / (12/438) ; 
 F = fisher.test(X) # 6.393955; 1.9421 p = 0.4012; (3/44) / (15/428) 
 
-
 # if distance 1 == 50 and distance 2 = 5, DiiD have 0.0259 fraction of deletions but not DiiD - 0.0142
 # if distance 1 == 30 and distance 2 = 5, DiiD have 0.04   fraction of deletions but not DiiD - 0.0144
 
@@ -156,8 +155,6 @@ fisher.test(X)
 
 # the same but within the contact zone:
 
-
-
 # 1000	5	0.06149588	2.6172263	2696_22_234_5 # distance1A = 1000, distance1B = 10, distance2 = 5; 
 X = cbind(c(2696,22),c(234,5))
 mosaicplot(X)    
@@ -168,7 +165,7 @@ fisher.test(X)
 
 ## reshufle direct and inverted repeats (types of repeats) within the major arc and count expected # of DIID
 # observed number of DIID is 260 & IDDI is 257 
-for (permut in 1:1000)
+for (permut in 1:10000) # 10000
 {
 Perm = Rep
 Perm$id_type = sample(Perm$id_type)
@@ -196,9 +193,57 @@ if (permut > 1 ) {DiidVec = c(DiidVec,DIID); IddiVec = c(IddiVec,IDDI); }
 }
 
 summary(DiidVec)
+# Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+# 301.0   354.0   365.0   365.4   377.0   430.0 
 summary(IddiVec)
 
+median(DiidVec)
+Pvalue = length(DiidVec[DiidVec <= 260])/length(DiidVec) # 0
+RelativeDiff = (median(DiidVec) - 260)/median(DiidVec); RelativeDiff # 29% => expected median is 29% higher than observed 
 hist(DiidVec, breaks = seq(250,450,1), col = 'gray')
 abline(v=260, col = 'red', lwd = 2)
+
+#### within the contact zone:
+## reshufle direct and inverted repeats (types of repeats) within the major arc and count expected # of DIID
+# observed number of DIID is 40 within the contact zone 
+
+for (permut in 1:10000) # 10000
+{
+  Perm = Rep
+  Perm = Perm[Perm$first_start >= 6000 & Perm$first_start <= 9000 & Perm$second_start >= 13000 & Perm$second_start <= 16000,]
+  Perm$id_type = sample(Perm$id_type)
+  Perm$first_start = Perm$first_start + Perm$length/2
+  Perm$second_start = Perm$second_start + Perm$length/2
+  DirRep=Perm[Perm$id_type == 1,]
+  InvRep=Perm[Perm$id_type == 4,]
+  Distance1A = 10   # 10
+  Distance1B = 1000 # 1000
+  DirRep$InvertedInside = 0
+  DirRep$InvertedOutside = 0
+  for (i in 1:nrow(DirRep))
+  { 
+    first_start = DirRep$first_start[i]
+    second_start = DirRep$second_start[i]
+    InvTemp = InvRep[(InvRep$first_start > first_start & InvRep$first_start < (first_start+Distance1A)) & (InvRep$second_start < second_start & InvRep$second_start > (second_start - Distance1B)),] 
+    if (nrow(InvTemp) > 0)   {DirRep$InvertedInside[i] = 1}
+    InvTemp = InvRep[(InvRep$first_start < first_start & InvRep$first_start > (first_start-Distance1A)) & (InvRep$second_start > second_start & InvRep$second_start < (second_start + Distance1B)),] 
+    if (nrow(InvTemp) > 0)   {DirRep$InvertedOutside[i] = 1}
+  }
+  DIID = nrow(DirRep[DirRep$InvertedInside == 1,])
+  IDDI = nrow(DirRep[DirRep$InvertedOutside == 1,])
+  if (permut == 1) {DiidVec = DIID; IddiVec = IDDI}
+  if (permut > 1 ) {DiidVec = c(DiidVec,DIID); IddiVec = c(IddiVec,IDDI); }
+}
+
+summary(DiidVec)
+# Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+# 301.0   354.0   365.0   365.4   377.0   430.0 
+summary(IddiVec)
+
+median(DiidVec) # 54
+Pvalue = length(DiidVec[DiidVec <= 40])/length(DiidVec);  Pvalue # 0.0243
+RelativeDiff = (median(DiidVec) - 40)/median(DiidVec); RelativeDiff # 0.26 => expected median is 29% higher than observed 
+hist(DiidVec, breaks = seq(20,100,1), col = 'gray')
+abline(v=40, col = 'red', lwd = 2)
 
 dev.off()  
