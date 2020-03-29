@@ -60,10 +60,11 @@ DirRep$ContactZone = 0
 ## 5: derive InvertedInside (diid) and InvertedOutside (iddi) combinations for each direct repeat:
 # if inverted: Distance1A = 1000 & Distance1B = 10 => 0	1000	5	0.06149588	2.6172263	2696_22_234_5  
 # if acording to Falcenberg: Distance1A = 10 & Distance1B = 1000 => 0	10	5	0.007159735	3.7005539	2677_20_253_7  
-for (loop in 0:20)
-{
-  Distance1A = 10 + loop*10 #  10 + loop*10
-  Distance1B = 1000 # 1000 is very good
+  loop = 0
+#for (loop in 0:20)
+#{
+  Distance1A = 10   # 10
+  Distance1B = 1000 # 1000
   DirRep$InvertedInside = 0
   DirRep$InvertedOutside = 0
   for (i in 1:nrow(DirRep))
@@ -82,8 +83,8 @@ for (loop in 0:20)
   # if this difference (iddi - diid) is stronger within the contact zone?
   # we can do the same for mammals!!!! and bacteria - longevity!!!
   
-  DIID = nrow(DirRep[DirRep$InvertedInside == 1,])
-  IDDI = nrow(DirRep[DirRep$InvertedOutside == 1,])
+  DIID = nrow(DirRep[DirRep$InvertedInside == 1,])  # 260
+  IDDI = nrow(DirRep[DirRep$InvertedOutside == 1,]) # 257
   table(DirRep$InvertedInside) # 1798; 976; 634; 296; 77; 24;
   table(DirRep$InvertedOutside) # 1859; 1099; 669; 326; 80; 36;
 
@@ -101,10 +102,9 @@ for (loop in 0:20)
   F = fisher.test(X)
   FisherP.DiiD.IddI = F$p.value
   FisherOdds.DiiD.IddI = as.numeric(F$estimate)
-  
-  
+
 ## 6: derive PresenceOfDeletion for each direct repeat:
-  Distance2 = 5+loop
+  Distance2 = 5 # 5+loop
   DirRep$second_end = DirRep$second_start + DirRep$length
   DirRep$PresenceOfDeletion = 0
   for (i in 1:nrow(DirRep))
@@ -115,8 +115,9 @@ for (loop in 0:20)
     TempBreaks = breaks[(breaks$X5..breakpoint > (first_start-Distance2) & breaks$X5..breakpoint < (first_start+Distance2)) & (breaks$X3..breakpoint > (second_start-Distance2) & breaks$X3..breakpoint < (second_start+Distance2)),] 
     if (nrow(TempBreaks) > 0)   {DirRep$PresenceOfDeletion[i] = 1}
   }
-  table(DirRep$PresenceOfDeletion) # 2738/219
-  
+table(DirRep$PresenceOfDeletion) # 2930/27
+DirRep = DirRep[order(-DirRep$PresenceOfDeletion,-DirRep$InvertedInside),]
+    
 ## 6: compare frequencies:
   
 mean(DirRep[DirRep$InvertedInside == 1,]$PresenceOfDeletion)  
@@ -134,9 +135,70 @@ FisherMatrixCDAB = paste(c(CD$Freq,AB$Freq),collapse = '_')
 OneLine1 = data.frame(loop,Distance1A,Distance2,FisherP,FisherOdds,FisherMatrixCDAB,DIID,IDDI,DIIDInContactZone,IDDIInContactZone,DIIDOutOfContactZone,IDDIOutOfContactZone,FisherP.DiiD.IddI,FisherOdds.DiiD.IddI)
 if (loop == 0) {Final = OneLine1}
 if (loop >  0) {Final = rbind(Final,OneLine1)}
-}
+# }
+
+## Fisher test within the contact zone is even stronger:
+
+AB=data.frame(table(DirRep[DirRep$ContactZone == 1 & DirRep$InvertedInside == 1,]$PresenceOfDeletion))  
+CD=as.data.frame(table(DirRep[DirRep$ContactZone == 1 & DirRep$InvertedInside == 0,]$PresenceOfDeletion))  
+X = cbind(CD$Freq,AB$Freq) # (6/34) / (12/438) ; 
+F = fisher.test(X) # 6.393955; 1.9421 p = 0.4012; (3/44) / (15/428) 
+
 
 # if distance 1 == 50 and distance 2 = 5, DiiD have 0.0259 fraction of deletions but not DiiD - 0.0142
 # if distance 1 == 30 and distance 2 = 5, DiiD have 0.04   fraction of deletions but not DiiD - 0.0144
+
+### some proofs of assymetry:  better association with deletions if first distance is short
+# 10	5	0.007159735	3.7005539 2677_20_253_7 # distance1A = 10, distance1B = 1000, distance2 = 5; 
+X = cbind(c(2677,20),c(253,7)) # 2957 - 260
+mosaicplot(X)    
+fisher.test(X)
+
+# the same but within the contact zone:
+
+
+
+# 1000	5	0.06149588	2.6172263	2696_22_234_5 # distance1A = 1000, distance1B = 10, distance2 = 5; 
+X = cbind(c(2696,22),c(234,5))
+mosaicplot(X)    
+fisher.test(X)
+
+# the same but within the contact zone:
+
+
+## reshufle direct and inverted repeats (types of repeats) within the major arc and count expected # of DIID
+# observed number of DIID is 260 & IDDI is 257 
+for (permut in 1:1000)
+{
+Perm = Rep
+Perm$id_type = sample(Perm$id_type)
+Perm$first_start = Perm$first_start + Perm$length/2
+Perm$second_start = Perm$second_start + Perm$length/2
+DirRep=Perm[Perm$id_type == 1,]
+InvRep=Perm[Perm$id_type == 4,]
+Distance1A = 10   # 10
+Distance1B = 1000 # 1000
+DirRep$InvertedInside = 0
+DirRep$InvertedOutside = 0
+for (i in 1:nrow(DirRep))
+  { 
+  first_start = DirRep$first_start[i]
+  second_start = DirRep$second_start[i]
+  InvTemp = InvRep[(InvRep$first_start > first_start & InvRep$first_start < (first_start+Distance1A)) & (InvRep$second_start < second_start & InvRep$second_start > (second_start - Distance1B)),] 
+  if (nrow(InvTemp) > 0)   {DirRep$InvertedInside[i] = 1}
+  InvTemp = InvRep[(InvRep$first_start < first_start & InvRep$first_start > (first_start-Distance1A)) & (InvRep$second_start > second_start & InvRep$second_start < (second_start + Distance1B)),] 
+  if (nrow(InvTemp) > 0)   {DirRep$InvertedOutside[i] = 1}
+  }
+DIID = nrow(DirRep[DirRep$InvertedInside == 1,])
+IDDI = nrow(DirRep[DirRep$InvertedOutside == 1,])
+if (permut == 1) {DiidVec = DIID; IddiVec = IDDI}
+if (permut > 1 ) {DiidVec = c(DiidVec,DIID); IddiVec = c(IddiVec,IDDI); }
+}
+
+summary(DiidVec)
+summary(IddiVec)
+
+hist(DiidVec, breaks = seq(250,450,1), col = 'gray')
+abline(v=260, col = 'red', lwd = 2)
 
 dev.off()  
