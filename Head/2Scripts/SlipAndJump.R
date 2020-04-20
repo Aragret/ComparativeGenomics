@@ -1,6 +1,7 @@
 rm(list=ls(all=TRUE))
 
 library(raster) # install.packages("raster")
+plots_dir <- normalizePath(file.path("../../Body/4Figures/"))
 
 pdf("../../Body/4Figures/SlipAndJump.R.01.pdf")
   
@@ -446,3 +447,136 @@ plot(HomologyAndRepeats$LogRegr.ContactPoint.Coord1,-log10(HomologyAndRepeats$Lo
 plot(HomologyAndRepeats$LogRegr.ContactPoint.Coord1,HomologyAndRepeats$LogRegr.ContactPoint.ResidualDeviance,   xlab = '3 prime position', ylab = 'ResidualDeviance');  abline(v = 13000, col = 'red', lwd = 1); abline(v = 16000, col = 'red', lwd = 1) 
 
 dev.off()  
+
+##### Heatmap merged microhomology and AIC scores #### 
+if (!require(tidyverse)) install.packages("tidyverse")
+if (!require(ggasym)) install.packages("ggasym")
+
+tib <- HomologyAndRepeats %>% 
+  select(
+    LogRegr.ContactPoint.Coord1,
+    LogRegr.ContactPoint.Coord2,
+    MicroHomologyScore,
+    LogRegr.ContactPoint.AIC
+  ) %>% 
+  asymmetrise(., 
+              LogRegr.ContactPoint.Coord1, 
+              LogRegr.ContactPoint.Coord2)
+
+pltHeatmap_mhAIC <- ggplot(tib,
+                           aes(x = LogRegr.ContactPoint.Coord1, 
+                               y = LogRegr.ContactPoint.Coord2)) +
+  geom_asymmat(aes(fill_tl = LogRegr.ContactPoint.AIC,
+                   fill_br = MicroHomologyScore)) +
+  scale_fill_tl_distiller(
+    type = "seq",
+    palette = "Spectral",
+    direction = 1,
+    na.value = "white",
+    guide = guide_colourbar(
+      direction = "horizontal",
+      order = 1,
+      title.position = "top"
+    )
+  ) +
+  scale_fill_br_distiller(
+    type = "seq",
+    palette = "RdYlGn",
+    direction = 1,
+    na.value = "white",
+    guide = guide_colourbar(
+      direction = "horizontal",
+      order = 2,
+      title.position = "top"
+    )
+  ) +
+  labs(fill_tl = "top-left Contact AIC",
+       fill_br = "bottom-right Microhomology",
+       title = "Model of mtDNA contacts") +
+  theme_bw() +
+  theme(
+    axis.title = element_blank(),
+    plot.title = element_text(hjust = 0.5),
+    panel.background = element_rect(fill = "white"),
+    panel.grid = element_blank()
+  )
+
+if (!require(cowplot)) install.packages("cowplot")
+cowplot::save_plot(
+  plot = pltHeatmap_mhAIC,
+  base_height = 8.316,
+  base_width = 11.594,
+  file = normalizePath(
+    file.path(plots_dir, 'heatmap_microhomology_AIC.pdf')
+  )
+)
+
+##### Again: Heatmap merged microhomology and AIC scores with actual deledions circles ####
+tib <- HomologyAndRepeats %>% 
+  select(
+    LogRegr.ContactPoint.Coord1,
+    LogRegr.ContactPoint.Coord2,
+    MicroHomologyScore,
+    LogRegr.ContactPoint.AIC,
+    Deletion
+  ) %>% 
+  asymmetrise(., 
+              LogRegr.ContactPoint.Coord1, 
+              LogRegr.ContactPoint.Coord2)
+
+pltHeatmap_mhAIC_wt_deletions <- ggplot(tib,
+                                        aes(x = LogRegr.ContactPoint.Coord1, 
+                                            y = LogRegr.ContactPoint.Coord2)) +
+  geom_asymmat(aes(fill_tl = LogRegr.ContactPoint.AIC,
+                   fill_br = MicroHomologyScore)) +
+  geom_point(
+    data = subset(tib, Deletion > 0),
+    aes(alpha = 0.3),
+    shape = 1,
+    size = 2.3,
+    color = "#041c00",
+    show.legend = FALSE,
+    na.rm = TRUE
+  ) +
+  scale_fill_tl_distiller(
+    type = "seq",
+    palette = "Spectral",
+    direction = 1,
+    na.value = "white",
+    guide = guide_colourbar(
+      direction = "horizontal",
+      order = 1,
+      title.position = "top"
+    )
+  ) +
+  scale_fill_br_distiller(
+    type = "seq",
+    palette = "RdYlGn",
+    direction = 1,
+    na.value = "white",
+    guide = guide_colourbar(
+      direction = "horizontal",
+      order = 2,
+      title.position = "top"
+    )
+  ) +
+  labs(fill_tl = "top-left Contact AIC",
+       fill_br = "bottom-right Microhomology",
+       title = "Model of mtDNA contacts and deletions") +
+  theme_bw() +
+  theme(
+    axis.title = element_blank(),
+    plot.title = element_text(hjust = 0.5),
+    panel.background = element_rect(fill = "white"),
+    panel.grid = element_blank()
+  )
+
+cowplot::save_plot(
+  plot = pltHeatmap_mhAIC_wt_deletions,
+  base_height = 8.316,
+  base_width = 11.594,
+  file = normalizePath(
+    file.path(plots_dir, 'heatmap_microhomology_AIC_wt_deledions.pdf')
+  )
+)
+
