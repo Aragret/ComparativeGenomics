@@ -1144,12 +1144,12 @@ pltHeatmap_mhAIC_wt_deletions <- ggplot(tib,
     aes(alpha = 0.3),
     shape = 1,
     size = 2.3,
-    color = "#041c00",
+    color = "#000000", # "#041c00",
     show.legend = FALSE,
     na.rm = TRUE
   ) +
   scale_fill_br_gradientn(
-    colours = viridis::viridis(200),
+    colours = viridis::viridis(2000)[250:2000],
     na.value = "white",
     guide = guide_colourbar(
       direction = "horizontal",
