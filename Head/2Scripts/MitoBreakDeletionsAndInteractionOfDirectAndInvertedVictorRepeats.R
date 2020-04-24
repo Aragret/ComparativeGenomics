@@ -31,8 +31,31 @@ pdf("../../Body/4Figures/MitoBreakDeletionsAndInteractionOfDirectAndInvertedVict
   nrow(breaks); breaks = breaks[breaks$X5..breakpoint > 5781 & breaks$X3..breakpoint > 5781,]; nrow(breaks)
   summary(breaks$X5..breakpoint)
   summary(breaks$X3..breakpoint)
-  hist(breaks$X5..breakpoint, breaks = seq(0, 16700, 100))
-  hist(breaks$X3..breakpoint, breaks = seq(0, 16700, 100))
+  hist(breaks$X5..breakpoint, breaks = seq(0, 16700, 100)) # Note: Shapiro-Wilk Normality Test for X5..breakpoint: p-value = < 0.001
+  hist(breaks$X3..breakpoint, breaks = seq(0, 16700, 100)) # Note: Shapiro-Wilk Normality Test for X3..breakpoint: p-value = < 0.001
+  
+  ggstatsplot::gghistostats(
+    data = breaks,
+    x = X5..breakpoint,
+    effsize.type = "d",
+    test.value = 11000,
+    test.value.size = TRUE,
+    bar.measure = "mix",
+    centrality.para = "median",
+    test.value.line = TRUE,
+    normal.curve = TRUE
+  )
+  ggstatsplot::gghistostats(
+    data = breaks,
+    x = X3..breakpoint,
+    effsize.type = "d",
+    test.value = 11000,
+    test.value.size = TRUE,
+    bar.measure = "mix",
+    centrality.para = "median",
+    test.value.line = TRUE,
+    normal.curve = TRUE
+  )
   
 ## 2: read all degraded repeats of Victor (direct and inverted):
   Rep = read.table("../../Body/1Raw/DegRepsHomo_sapiens 2018_07_02.csv", header = TRUE, sep = ';') 
@@ -45,6 +68,11 @@ pdf("../../Body/4Figures/MitoBreakDeletionsAndInteractionOfDirectAndInvertedVict
   DirRep=Rep[Rep$id_type == 1,]
   InvRep=Rep[Rep$id_type == 4,]
   
+DirRep_keep <- DirRep
+InvRep_keep <- InvRep
+Rep_keep <- Rep
+
+  
   DirRep$first_start = DirRep$first_start + DirRep$length/2
   InvRep$second_start = InvRep$second_start + InvRep$length/2
   
@@ -56,27 +84,48 @@ DirRep$ContactZone = 0
     {DirRep$ContactZone[i] = 1}
   }
   table(DirRep$ContactZone)
+  ggstatsplot::ggpiestats(
+    data = as.data.frame(DirRep),
+    x = ContactZone, # <<
+    slice.label = "both", # <<
+    messages = TRUE
+  )
   
 ## 5: derive InvertedInside (diid) and InvertedOutside (iddi) combinations for each direct repeat:
 # if inverted: Distance1A = 1000 & Distance1B = 10 => 0	1000	5	0.06149588	2.6172263	2696_22_234_5  
 # if acording to Falcenberg: Distance1A = 10 & Distance1B = 1000 => 0	10	5	0.007159735	3.7005539	2677_20_253_7  
   loop = 0
-#for (loop in 0:20)
-#{
+  #for (loop in 0:20)
+  #{
   Distance1A = 10   # 10
   Distance1B = 1000 # 1000
   DirRep$InvertedInside = 0
   DirRep$InvertedOutside = 0
   for (i in 1:nrow(DirRep))
-  { # i=1
-  first_start = DirRep$first_start[i]
-  second_start = DirRep$second_start[i]
-  # DirRep$InvertedInside (cases)
-  InvTemp = InvRep[(InvRep$first_start > first_start & InvRep$first_start < (first_start+Distance1A)) & (InvRep$second_start < second_start & InvRep$second_start > (second_start - Distance1B)),] 
-  if (nrow(InvTemp) > 0)   {DirRep$InvertedInside[i] = 1}
-  # DirRep$InvertedOutside (controls)
-  InvTemp = InvRep[(InvRep$first_start < first_start & InvRep$first_start > (first_start-Distance1A)) & (InvRep$second_start > second_start & InvRep$second_start < (second_start + Distance1B)),] 
-  if (nrow(InvTemp) > 0)   {DirRep$InvertedOutside[i] = 1}
+  {
+    # i=1
+    first_start = DirRep$first_start[i]
+    second_start = DirRep$second_start[i]
+    # DirRep$InvertedInside (cases)
+    InvTemp = InvRep[(InvRep$first_start > first_start &
+                        InvRep$first_start < (first_start + Distance1A)) &
+                       (
+                         InvRep$second_start < second_start &
+                           InvRep$second_start > (second_start - Distance1B)
+                       ), ]
+    if (nrow(InvTemp) > 0)   {
+      DirRep$InvertedInside[i] = 1
+    }
+    # DirRep$InvertedOutside (controls)
+    InvTemp = InvRep[(InvRep$first_start < first_start &
+                        InvRep$first_start > (first_start - Distance1A)) &
+                       (
+                         InvRep$second_start > second_start &
+                           InvRep$second_start < (second_start + Distance1B)
+                       ), ]
+    if (nrow(InvTemp) > 0)   {
+      DirRep$InvertedOutside[i] = 1
+    }
   }
   # number of DIID combinations is always < than IDDI with different Distance parameter!!!
   # using this difference we can touch the distance of the effect - walk with windows step by step...!

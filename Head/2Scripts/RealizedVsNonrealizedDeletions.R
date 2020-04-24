@@ -1,12 +1,29 @@
 rm(list=ls(all=TRUE))
+if (!require(tidyverse)) install.packages("tidyverse")
+if (!require(here)) install.packages("here")
+if (!require(ggpubr)) install.packages("ggpubr")
 
-library(ggplot2)
+library(tidyverse)
+library(here)
 library(ggpubr)
 #library(mosaicplot) # install.packages('mosaicplot')
-
+plots_dir <- here("Body/4Figures") %>% normalizePath()
 ### 1: READ VICTOR's FILE 
-Rep = read.table("../../Body/2Derived/Homo_sapiens_triangles.txt", sep = "\t", header = FALSE)
-names(Rep)=c('DelStart','DelEnd','DelLength','MasterRepeat','AlternRepeats1','AlternRepeats2','AlternRepeats3','AlternRepeats4')
+Rep = read.table(
+  here("Body/2Derived/Homo_sapiens_triangles.txt"),
+  sep = "\t",
+  header = FALSE
+)
+names(Rep) = c(
+  'DelStart',
+  'DelEnd',
+  'DelLength',
+  'MasterRepeat',
+  'AlternRepeats1',
+  'AlternRepeats2',
+  'AlternRepeats3',
+  'AlternRepeats4'
+)
 # MasterRepeat is a repeat with arms located close to given deletion breakpoints
 # AlternativeRepeats1-4 are repeats where: first arm == arm1 of Master; first arm == arm2 of Master; second arm == arm1 of Master; second arm == arm2 of Master; 
 # mb_del == реализованные делеции (существуют в MitoBreak); non_del - не реализованные == не существуют в MitoBreak
@@ -17,69 +34,106 @@ names(Rep)=c('DelStart','DelEnd','DelLength','MasterRepeat','AlternRepeats1','Al
 # OH: 110-441
 # OL: 5721-5781
 nrow(Rep)
-Rep=Rep[Rep$DelStart > 5781 & Rep$DelStart < 16569 & Rep$DelEnd > 5781 & Rep$DelEnd < 16569,]
+Rep = Rep[Rep$DelStart   > 5781 &
+            Rep$DelStart < 16569 & 
+            Rep$DelEnd > 5781 & 
+            Rep$DelEnd < 16569, 
+          ]
 nrow(Rep)
 
 ### 3: concatenate all alternative deletions
-Rep$AllAlternRepeats = paste(Rep$AlternRepeats1,Rep$AlternRepeats2,Rep$AlternRepeats3,Rep$AlternRepeats4,sep=',')
-Rep$AllAlternRepeats = gsub("\\,\\[\\]\\,",",",Rep$AllAlternRepeats)
-Rep$AllAlternRepeats = gsub("^\\[","",Rep$AllAlternRepeats)
-Rep$AllAlternRepeats = gsub("\\]$","",Rep$AllAlternRepeats)
+Rep$AllAlternRepeats = paste(
+  Rep$AlternRepeats1,
+  Rep$AlternRepeats2,
+  Rep$AlternRepeats3,
+  Rep$AlternRepeats4,
+  sep = ','
+)
+Rep$AllAlternRepeats = gsub("\\,\\[\\]\\,", ",", Rep$AllAlternRepeats)
+Rep$AllAlternRepeats = gsub("^\\[",         "",  Rep$AllAlternRepeats)
+Rep$AllAlternRepeats = gsub("\\]$",         "",  Rep$AllAlternRepeats)
 
 ### 4: prepare dataset for analysis of realized and nonrealized deletions line by line
-Rep$CenterOfRealizedRepeats = 0
+Rep$CenterOfRealizedRepeats =    0
 Rep$CenterOfNonRealizedRepeats = 0
-Rep$LengthOfRealizedRepeats = 0
+
+Rep$LengthOfRealizedRepeats =    0
 Rep$LengthOfNonRealizedRepeats = 0
-Rep$StartOfRealizedRepeats = 0
+
+Rep$StartOfRealizedRepeats =    0
 Rep$StartOfNonRealizedRepeats = 0
-Rep$EndOfRealizedRepeats = 0
+
+Rep$EndOfRealizedRepeats =    0
 Rep$EndOfNonRealizedRepeats = 0
 
-for (i in (1:nrow(Rep)))
-{
-# i = 1
-# format of data to get a dataset of master and all alternative repeats for each deletion (for each line of the dataset)
-temp =  Rep[i,]
-AltRep = unlist(strsplit(temp$AllAlternRepeats, "\\]\\,\\[")); AltRep = AltRep[AltRep != ""]
-AltRep = data.frame(AltRep); names(AltRep)=c('WholeLine')
-if (nrow(AltRep) > 0)
-  {
-  AltRep$RepeatType = 'alternative'
-  AltRep$WholeLine = as.character(AltRep$WholeLine)
-
-  MasterRepeat = as.character(temp$MasterRepeat); MasterRepeat = gsub("^\\[","",MasterRepeat); MasterRepeat = gsub("\\]$","",MasterRepeat); 
-  MasterRepeat = paste(MasterRepeat,'mb_del',sep=' ')
-  MasterRepeat = data.frame(MasterRepeat); names(MasterRepeat)=c('WholeLine'); MasterRepeat$RepeatType = 'master'
-
-  AllRep=rbind(MasterRepeat,AltRep)
-  ReturnFifth = function(x)  {unlist(strsplit(x,' '))[5]}; AllRep$RealisedRepeat = apply(as.matrix(AllRep$WholeLine),1,FUN = ReturnFifth)
-  ReturnFirst = function(x)  {as.numeric(unlist(strsplit(x,' '))[1])}; AllRep$RepStart = apply(as.matrix(AllRep$WholeLine),1,FUN = ReturnFirst)
-  ReturnSecond = function(x)  {as.numeric(unlist(strsplit(x,' '))[2])}; AllRep$RepEnd = apply(as.matrix(AllRep$WholeLine),1,FUN = ReturnSecond)
-  AllRep = AllRep[AllRep$RepStart > 5781 & AllRep$RepStart < 16569 & AllRep$RepEnd > 5781 & AllRep$RepEnd < 16569,]
-  if (nrow(AllRep) > 0)
-    {
-    AllRep$Center = (AllRep$RepEnd - AllRep$RepStart)/2 + AllRep$RepStart
-    Rep$CenterOfRealizedRepeats[i]  = mean(AllRep[AllRep$RealisedRepeat == 'mb_del',]$Center)
-    Rep$CenterOfNonRealizedRepeats[i]= mean(AllRep[AllRep$RealisedRepeat == 'non_del',]$Center)
-    AllRep$Length = AllRep$RepEnd - AllRep$RepStart
-    Rep$LengthOfRealizedRepeats[i] = mean(AllRep[AllRep$RealisedRepeat == 'mb_del',]$Length)
-    Rep$LengthOfNonRealizedRepeats[i] =  mean(AllRep[AllRep$RealisedRepeat == 'non_del',]$Length) 
-    Rep$StartOfNonRealizedRepeats[i] =   mean(AllRep[AllRep$RealisedRepeat == 'non_del',]$RepStart)
-    Rep$StartOfRealizedRepeats[i] =   mean(AllRep[AllRep$RealisedRepeat == 'mb_del',]$RepStart)
-    Rep$EndOfNonRealizedRepeats[i] =   mean(AllRep[AllRep$RealisedRepeat == 'non_del',]$RepEnd)
-    Rep$EndOfRealizedRepeats[i] =   mean(AllRep[AllRep$RealisedRepeat == 'mb_del',]$RepEnd)
+for (i in (1:nrow(Rep))) {
+  # i = 1
+  # format of data to get a dataset of master and all alternative repeats for each deletion (for each line of the dataset)
+  temp =  Rep[i, ]
+  AltRep = unlist(strsplit(temp$AllAlternRepeats, "\\]\\,\\["))
+  AltRep = AltRep[AltRep != ""]
+  AltRep = data.frame(AltRep)
+  names(AltRep) = c('WholeLine')
+  if (nrow(AltRep) > 0) {
+    AltRep$RepeatType = 'alternative'
+    AltRep$WholeLine = as.character(AltRep$WholeLine)
     
-    if (i == 1) {FinalAllRep = AllRep}
-    if (i >  1) {FinalAllRep = rbind(FinalAllRep,AllRep)}
+    MasterRepeat = as.character(temp$MasterRepeat)
+    MasterRepeat = gsub("^\\[", "", MasterRepeat)
+    MasterRepeat = gsub("\\]$", "", MasterRepeat)
+    
+    MasterRepeat = paste(MasterRepeat, 'mb_del', sep = ' ')
+    MasterRepeat = data.frame(MasterRepeat)
+    names(MasterRepeat) = c('WholeLine')
+    MasterRepeat$RepeatType = 'master'
+    
+    AllRep = rbind(MasterRepeat, AltRep)
+    ReturnFifth = function(x)  {
+      unlist(strsplit(x, ' '))[5]
+    }
+    AllRep$RealisedRepeat = apply(as.matrix(AllRep$WholeLine), 1, FUN = ReturnFifth)
+    ReturnFirst = function(x)  {
+      as.numeric(unlist(strsplit(x, ' '))[1])
+    }
+    AllRep$RepStart = apply(as.matrix(AllRep$WholeLine), 1, FUN = ReturnFirst)
+    ReturnSecond = function(x)  {
+      as.numeric(unlist(strsplit(x, ' '))[2])
+    }
+    AllRep$RepEnd = apply(as.matrix(AllRep$WholeLine), 1, FUN = ReturnSecond)
+    AllRep = AllRep[AllRep$RepStart   > 5781 &
+                      AllRep$RepStart < 16569 &
+                      AllRep$RepEnd > 5781 &
+                      AllRep$RepEnd < 16569, ]
+    if (nrow(AllRep) > 0) {
+      AllRep$Center = (AllRep$RepEnd - AllRep$RepStart) / 2 + AllRep$RepStart
+      Rep$CenterOfRealizedRepeats[i]  = mean(AllRep[AllRep$RealisedRepeat == 'mb_del',]$Center)
+      Rep$CenterOfNonRealizedRepeats[i] = mean(AllRep[AllRep$RealisedRepeat == 'non_del',]$Center)
+      
+      AllRep$Length = AllRep$RepEnd - AllRep$RepStart
+      Rep$LengthOfRealizedRepeats[i] = mean(AllRep[AllRep$RealisedRepeat == 'mb_del',]$Length)
+      Rep$LengthOfNonRealizedRepeats[i] =  mean(AllRep[AllRep$RealisedRepeat == 'non_del',]$Length)
+      
+      Rep$StartOfNonRealizedRepeats[i] =   mean(AllRep[AllRep$RealisedRepeat == 'non_del', ]$RepStart)
+      Rep$StartOfRealizedRepeats[i] =   mean(AllRep[AllRep$RealisedRepeat == 'mb_del', ]$RepStart)
+      
+      Rep$EndOfNonRealizedRepeats[i] =   mean(AllRep[AllRep$RealisedRepeat == 'non_del', ]$RepEnd)
+      Rep$EndOfRealizedRepeats[i] =   mean(AllRep[AllRep$RealisedRepeat == 'mb_del', ]$RepEnd)
+      
+      if (i == 1) {
+        FinalAllRep = AllRep
+      }
+      if (i >  1) {
+        FinalAllRep = rbind(FinalAllRep, AllRep)
+      }
     }
   }
 }
 nrow(Rep) # 703 
-Rep=Rep[Rep$CenterOfRealizedRepeats > 0,]; nrow(Rep) # 643
-Rep=Rep[Rep$CenterOfNonRealizedRepeats >0,] # it means there is at least one extra (third) arm to analyze
+Rep = Rep[Rep$CenterOfRealizedRepeats > 0, ]
 nrow(Rep) # 643
-Rep = Rep[!is.na(Rep$LengthOfRealizedRepeat),] # 618
+Rep = Rep[Rep$CenterOfNonRealizedRepeats > 0, ] # it means there is at least one extra (third) arm to analyze
+nrow(Rep) # 643
+Rep = Rep[!is.na(Rep$LengthOfRealizedRepeat), ] # 618
 
 ##
 pdf("../../Body/4Figures/RealizedVsNonrealizedDeletions.R.01.pdf")
@@ -91,13 +145,105 @@ summary(Rep$CenterOfRealizedRepeats)
 summary(Rep$CenterOfNonRealizedRepeats)
 boxplot(Rep$CenterOfRealizedRepeats,Rep$CenterOfNonRealizedRepeats, notch = TRUE, names=c('CenterOfRealizedRepeats','CenterOfNonRealizedRepeats'))
 
-## length is longer in realized repeats
+RepReal <- Rep %>% 
+  select(Realized = CenterOfRealizedRepeats, 
+         NonRealized = CenterOfNonRealizedRepeats) %>% 
+  gather(., `Realized`, `NonRealized`,
+         key = "Deletion", value = "CenterOfRepeats")
+
+pltViolRepCenterRelease <- ggstatsplot::ggbetweenstats(
+  data = RepReal,
+  x = Deletion,
+  y = CenterOfRepeats,
+  notch = TRUE,
+  # show notched box plot
+  mean.ci = TRUE,
+  # whether to display confidence interval for means
+  k = 5,
+  # number of decimal places for statistical results
+  # outlier.tagging = TRUE, # whether outliers need to be tagged
+  # outlier.label = ContactZone, # variable to be used for the outlier tag
+  xlab = "Realisation of deletion",
+  # label for the x-axis variable
+  ylab = "Center of Repeats",
+  # label for the y-axis variable
+  title = "The effect of repeats' position on deletion realisation",
+  # title text for the plot
+  ggtheme = ggthemes::theme_fivethirtyeight(),
+  # choosing a different theme
+  ggstatsplot.layer = FALSE,
+  # turn off `ggstatsplot` theme layer
+  package = "wesanderson",
+  # package from which color palette is to be taken
+  palette = "Royal1",
+  # choosing a different color palette
+  messages = TRUE
+)
+# Note: Shapiro-Wilk Normality Test for Center of Repeats: p-value = 0.003
+# Note: Bartlett's test for homogeneity of variances for factor Realisation of deletion: p-value = < 0.001
+cowplot::save_plot(
+  plot = pltViolRepCenterRelease,
+  base_height = 8,
+  base_asp = 1.618,
+  file = normalizePath(
+    file.path(plots_dir, 'violin_rep_center_release.pdf')
+  )
+)
+
+
+## deletion is longer in realized repeats
 wilcox.test(Rep$LengthOfRealizedRepeats,Rep$LengthOfNonRealizedRepeats,paired = TRUE) # significant
 t.test(Rep$LengthOfRealizedRepeats,Rep$LengthOfNonRealizedRepeats,paired = TRUE) # significant
 summary(Rep$LengthOfRealizedRepeats)   # 5643  mean
 summary(Rep$LengthOfNonRealizedRepats) # 3450  mean
 summary(Rep$LengthOfRealizedRepeats - Rep$LengthOfNonRealizedRepeats) # 1998 mean
 boxplot(Rep$LengthOfRealizedRepeats,Rep$LengthOfNonRealizedRepeats, notch = TRUE, names=c('LengthOfRealizedRepeats','LengthOfNonRealizedRepeats'))
+
+RepReal <- Rep %>% 
+  select(Realized = LengthOfRealizedRepeats, 
+         NonRealized = LengthOfNonRealizedRepeats) %>% 
+  gather(., `Realized`, `NonRealized`,
+         key = "Deletion", value = "DistanceBetweenRepeats") %>% 
+  full_join(., RepReal)
+
+pltViolRepFlankLengthRelease <- ggstatsplot::ggbetweenstats(
+  data = RepReal,
+  x = Deletion,
+  y = DistanceBetweenRepeats,
+  notch = TRUE,
+  # show notched box plot
+  mean.ci = TRUE,
+  # whether to display confidence interval for means
+  k = 5,
+  # number of decimal places for statistical results
+  # outlier.tagging = TRUE, # whether outliers need to be tagged
+  # outlier.label = ContactZone, # variable to be used for the outlier tag
+  xlab = "Realisation of deletion",
+  # label for the x-axis variable
+  ylab = "Distance between Repeats",
+  # label for the y-axis variable
+  title = "The effect of repeats' distance on deletion realisation",
+  # title text for the plot
+  ggtheme = ggthemes::theme_fivethirtyeight(),
+  # choosing a different theme
+  ggstatsplot.layer = FALSE,
+  # turn off `ggstatsplot` theme layer
+  package = "wesanderson",
+  # package from which color palette is to be taken
+  palette = "Royal1",
+  # choosing a different color palette
+  messages = TRUE
+)
+# Note: Bartlett's test for homogeneity of variances for factor Realisation of deletion: p-value = < 0.001
+cowplot::save_plot(
+  plot = pltViolRepFlankLengthRelease,
+  base_height = 8,
+  base_asp = 1.618,
+  file = normalizePath(
+    file.path(plots_dir, 'violin_rep_flanked_length_release.pdf')
+  )
+)
+
 
 ## start and end in realized versus non-realized repeats 
 wilcox.test(Rep$StartOfRealizedRepeats,Rep$StartOfNonRealizedRepeats,paired = TRUE) # significant
@@ -109,6 +255,52 @@ quantile(Rep$StartOfRealizedRepeats, 0.9) # 10954
 summary(Rep$StartOfNonRealizedRepeats) # mean 9394
 summary(Rep$StartOfNonRealizedRepeats-Rep$StartOfRealizedRepeats) # mean 716 => non realised start later (~700 bp): 9394 - 8678
 
+RepReal <- Rep %>% 
+  select(Realized = StartOfRealizedRepeats, 
+         NonRealized = StartOfNonRealizedRepeats) %>% 
+  gather(., `Realized`, `NonRealized`,
+         key = "Deletion", value = "StartOfRepeats") %>% 
+  full_join(., RepReal)
+
+pltViolRepStartRelease <- ggstatsplot::ggbetweenstats(
+  data = RepReal,
+  x = Deletion,
+  y = StartOfRepeats,
+  notch = TRUE,
+  # show notched box plot
+  mean.ci = TRUE,
+  # whether to display confidence interval for means
+  k = 5,
+  # number of decimal places for statistical results
+  # outlier.tagging = TRUE, # whether outliers need to be tagged
+  # outlier.label = ContactZone, # variable to be used for the outlier tag
+  xlab = "Realisation of deletion",
+  # label for the x-axis variable
+  ylab = "Start of Repeats",
+  # label for the y-axis variable
+  title = "The effect of repeats' Start on deletion realisation",
+  # title text for the plot
+  ggtheme = ggthemes::theme_fivethirtyeight(),
+  # choosing a different theme
+  ggstatsplot.layer = FALSE,
+  # turn off `ggstatsplot` theme layer
+  package = "wesanderson",
+  # package from which color palette is to be taken
+  palette = "Royal1",
+  # choosing a different color palette
+  messages = TRUE
+)
+# Note: Bartlett's test for homogeneity of variances for factor Realisation of deletion: p-value = < 0.001
+cowplot::save_plot(
+  plot = pltViolRepStartRelease,
+  base_height = 8,
+  base_asp = 1.618,
+  file = normalizePath(
+    file.path(plots_dir, 'violin_rep_start_release.pdf')
+  )
+)
+
+
 wilcox.test(Rep$EndOfRealizedRepeats,Rep$EndOfNonRealizedRepeats,paired = TRUE) # significant
 t.test(Rep$EndOfRealizedRepeats,Rep$EndOfNonRealizedRepeats,paired = TRUE) # significant
 summary(Rep$EndOfRealizedRepeats)    # 14321 mean
@@ -116,6 +308,51 @@ summary(Rep$EndOfNonRealizedRepeats) # 13039 mean
 summary(Rep$EndOfNonRealizedRepeats-Rep$EndOfRealizedRepeats) # mean -1281=> non realised end earlier (~1300 bp): 13039 - 14321
 quantile(Rep$EndOfRealizedRepeats, 0.1) # 13286
 quantile(Rep$EndOfRealizedRepeats, 0.9) # 15863
+
+RepReal <- Rep %>% 
+  select(Realized = EndOfRealizedRepeats, 
+         NonRealized = EndOfNonRealizedRepeats) %>% 
+  gather(., `Realized`, `NonRealized`,
+         key = "Deletion", value = "EndOfRepeats") %>% 
+  full_join(., RepReal)
+
+pltViolRepEndRelease <- ggstatsplot::ggbetweenstats(
+  data = RepReal,
+  x = Deletion,
+  y = EndOfRepeats,
+  notch = TRUE,
+  # show notched box plot
+  mean.ci = TRUE,
+  # whether to display confidence interval for means
+  k = 5,
+  # number of decimal places for statistical results
+  # outlier.tagging = TRUE, # whether outliers need to be tagged
+  # outlier.label = ContactZone, # variable to be used for the outlier tag
+  xlab = "Realisation of deletion",
+  # label for the x-axis variable
+  ylab = "End of Repeats",
+  # label for the y-axis variable
+  title = "The effect of repeats' End on deletion realisation",
+  # title text for the plot
+  ggtheme = ggthemes::theme_fivethirtyeight(),
+  # choosing a different theme
+  ggstatsplot.layer = FALSE,
+  # turn off `ggstatsplot` theme layer
+  package = "wesanderson",
+  # package from which color palette is to be taken
+  palette = "Royal1",
+  # choosing a different color palette
+  messages = TRUE
+)
+# Note: Bartlett's test for homogeneity of variances for factor Realisation of deletion: p-value = < 0.001
+cowplot::save_plot(
+  plot = pltViolRepEndRelease,
+  base_height = 8,
+  base_asp = 1.618,
+  file = normalizePath(
+    file.path(plots_dir, 'violin_rep_end_release.pdf')
+  )
+)
 
 
 ## how to plot it in terms of X(start) and Y(end)? Just plot it? ALL?
