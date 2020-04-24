@@ -211,8 +211,14 @@ fisher.test(X)
 
 # the same but within the contact zone:
 
+#### distribution of all DIID within the major arc
 
-## reshufle direct and inverted repeats (types of repeats) within the major arc and count expected # of DIID
+Diid = DirRep[DirRep$InvertedInside == 1,]   # 260
+NotDiid = DirRep[DirRep$InvertedInside == 0,]# 2957
+plot(NotDiid$first_start,NotDiid$second_start, xlim = c(6000,16500), ylim = c(6000,16500)); par(new = TRUE) # dev.off()
+plot(Diid$second_start,Diid$first_start, xlim = c(6000,16500), ylim = c(6000,16500)); 
+
+#### reshufle direct and inverted repeats (types of repeats) within the major arc and count expected # of DIID
 # observed number of DIID is 260 & IDDI is 257 
 for (permut in 1:10000) # 10000
 {
