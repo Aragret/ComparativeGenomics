@@ -57,8 +57,8 @@ DirRep$ContactZone = 0
   }
   table(DirRep$ContactZone)
 
-## 5: derive PresenceOfDeletion for each direct repeat: - move it uppp!!!
-  Distance2 = 20 # 5
+## 5: derive PresenceOfDeletion for each direct repeat
+  Distance2 = 5 # 5
   DirRep$second_end = DirRep$second_start + DirRep$length
   DirRep$PresenceOfDeletion = 0
   for (i in 1:nrow(DirRep))
@@ -71,11 +71,13 @@ DirRep$ContactZone = 0
   }
   table(DirRep$PresenceOfDeletion) # 2930/27 /109 / 218 
   # 109/(2848+109) = 0.036 = random chance that direct repeat is associated with deletion
+  # 218/(218 + 2739) = 0.073 = random chance that direct repeat is associated with deletion
+  # 27 / (27 + 2930) = 0.009
 
 ## 6: derive DIID as a function of DistanceX, Y and Z: Dir-DistanceX-Inv-DistanceY-Inv-DistanceZ-Dir 
-DistanceXVec = c(5,50,seq(100,1000,100))
-DistanceYVec = seq(500,9000,500)
-DistanceZVec = c(5,seq(100,1000,100))
+DistanceXVec = c(10,50,seq(100,500,100))
+DistanceYVec = seq(2000,9000,500)
+DistanceZVec = c(10,50,seq(100,500,100))
 FirstLoopFlag = 1
   
 for (DistanceX in DistanceXVec) 
@@ -103,7 +105,9 @@ for (DistanceX in DistanceXVec)
         FrOfDiidWithDel = sum(Temp$DiidDel)/(sum(Temp$DiidNoDel)+sum(Temp$DiidDel))
         }
       NumDiid = nrow(Temp[Temp$InvertedInside == 1,])
-      ResLine = data.frame(DistanceX,DistanceY,DistanceZ,NumDiid,FrOfDiidWithDel)
+      MedianStart = median(Temp[Temp$InvertedInside == 1,]$first_start)
+      MedianEnd = median(Temp[Temp$InvertedInside == 1,]$second_start)
+      ResLine = data.frame(DistanceX,DistanceY,DistanceZ,NumDiid,FrOfDiidWithDel,MedianStart,MedianEnd)
       if (FirstLoopFlag == 0) {Final = rbind(Final,ResLine)}
       if (FirstLoopFlag == 1) {Final = ResLine; FirstLoopFlag = 0}
       }
@@ -112,7 +116,7 @@ for (DistanceX in DistanceXVec)
 
 Final = Final[order(-Final$FrOfDiidWithDel),]
 
-# I can add also location = median start and median end for all DIIDs of a given combination 
+# I can also walk with bins (not with cumulative curves) -> it will show if there is indeed trend or - only noise
 
 ##### DIIIIIIID => walk along each direct repeat and collect all inverted (with different settings) which fit them
 
