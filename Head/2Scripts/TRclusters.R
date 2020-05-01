@@ -62,10 +62,12 @@ mamm$Consensus = as.character(mamm$Consensus)
 pdf('../../Body/4Figures/MammClustersTr.pdf', width = 500, height = 500)
 
 dist_matrix = dist(mamm[, c('ConsensusLength', 'FullLength', 'CopyNumber', 'PercentMatches',
-                            'fr_A_repeat', 'fr_T_repeat', 'fr_G_repeat', "fr_C_repeat", 'Consensus')])
+                            'fr_A_repeat', 'fr_T_repeat', 'fr_G_repeat', "fr_C_repeat", 'fr_A_cons',
+                            'fr_T_cons', 'fr_G_cons', 'fr_C_cons', 'InDloop')])
 
 clusters = hclust(dist_matrix)
 
+par(cex=4)
 plot(clusters, labels = mamm$Species)
 
 clusterCut <- cutree(clusters, 5)
@@ -73,12 +75,6 @@ clusterCut <- cutree(clusters, 5)
 clusters_table = cbind(mamm, clusterCut)
 
 dev.off()
-
-###### play with distance matrix
-
-dist_matrix = as.matrix(dist(mamm[, c('ConsensusLength', 'CopyNumber', 'PercentMatches',
-                            'fr_A_repeat', 'fr_T_repeat', 'fr_G_repeat', "fr_C_repeat")]))
-
 
 
 ############################################
@@ -103,9 +99,14 @@ cor.test(data[data$clusterCut == 5,]$FullLength, data[data$clusterCut == 5,]$Gen
          method = 'spearman')
 
 
-third = data[data$clusterCut == 3,]
-
-summary(third)
+for(i in 1:5){
+  # i = 1
+  temp_data = data[data$clusterCut == i,]
+  agg = aggregate(temp_data$Number, by=list(temp_data$Species), sum)
+  names(agg) = c('Species', 'TrNumber')
+  agg = merge(agg, temp_data[, c('Species', 'GenerationLength_d')], by='Species', all.y = FALSE)
+  print(summary(glm(TrNumber ~ GenerationLength_d, data=agg)))
+}
 
 #######################################################################################
 ### PCA 
