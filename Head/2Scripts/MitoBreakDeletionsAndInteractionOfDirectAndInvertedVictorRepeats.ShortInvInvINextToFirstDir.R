@@ -173,6 +173,8 @@ table(DirRep$PresenceOfDeletionDummy)
 
 DirRep$DistanceBetweenDD = DirRep$second_start - DirRep$first_start
 summary(DirRep$DistanceBetweenDD)
+summary(DirRep$ClosestInvInvAfterFirstDir.FirstGap)# 53-8
+summary(DirRep$ClosestInvInvBeforeSecondDir.SecondGap)# 54-10
 
 ## how to understand - which window to take to associate repeats with deletions? run opposite test and associate each deletion with repeats => majority of deletions should be associated with repeats.
 
@@ -187,6 +189,10 @@ summary(glm(DirRep$PresenceOfDeletion ~ scale(DirRep$ClosestInvInvBeforeSecondDi
 
 # both pairs of inverted repeats - together
 summary(glm(DirRep$PresenceOfDeletion ~ scale(DirRep$ClosestInvInvAfterFirstDir.FirstGap) + scale(DirRep$ClosestInvInvBeforeSecondDir.SecondGap), family = 'poisson'))
+#  PAPER
+#  (Intercept)                                          -2.54234    0.09333 -27.241  < 2e-16 ***
+#  scale(DirRep$ClosestInvInvAfterFirstDir.FirstGap)    -1.04850    0.18254  -5.744 9.25e-09 ***
+#  scale(DirRep$ClosestInvInvBeforeSecondDir.SecondGap) -0.54681    0.11693  -4.676 2.92e-06 ***
 
 # both pairs of inverted repeats - together: FirstGap, SecondGap + other traits: OverlapFlag, IntermediateGap, EffectiveDistance, ContactZone
 summary(glm(DirRep$PresenceOfDeletion ~ scale(DirRep$ClosestInvInvAfterFirstDir.FirstGap) + scale(DirRep$OverlapFlag) +scale(DirRep$ClosestInvInvBeforeSecondDir.SecondGap), family = 'poisson'))
@@ -211,13 +217,18 @@ summary(glm(DirRep$PresenceOfDeletion ~ (scale(DirRep$ClosestInvInvAfterFirstDir
 wilcox.test(DirRep[DirRep$ContactZone == 0,]$ClosestInvInvAfterFirstDir.FirstGap,DirRep[DirRep$ContactZone == 1,]$ClosestInvInvAfterFirstDir.FirstGap)
 t.test(DirRep[DirRep$ContactZone == 0,]$ClosestInvInvAfterFirstDir.FirstGap,DirRep[DirRep$ContactZone == 1,]$ClosestInvInvAfterFirstDir.FirstGap)
 boxplot(DirRep[DirRep$ContactZone == 0,]$ClosestInvInvAfterFirstDir.FirstGap,DirRep[DirRep$ContactZone == 1,]$ClosestInvInvAfterFirstDir.FirstGap, outline = FALSE, notch = TRUE, ylab = 'FirstGap', names = c('OutContZone','InContZone'))
+length(DirRep[DirRep$ContactZone == 0,]$ClosestInvInvAfterFirstDir.FirstGap)
+length(DirRep[DirRep$ContactZone == 1,]$ClosestInvInvAfterFirstDir.FirstGap)
+# violinplot - alinaplot
 
 wilcox.test(DirRep[DirRep$ContactZone == 0,]$ClosestInvInvBeforeSecondDir.SecondGap,DirRep[DirRep$ContactZone == 1,]$ClosestInvInvBeforeSecondDir.SecondGap)
 t.test(DirRep[DirRep$ContactZone == 0,]$ClosestInvInvBeforeSecondDir.SecondGap,DirRep[DirRep$ContactZone == 1,]$ClosestInvInvBeforeSecondDir.SecondGap)
 boxplot(DirRep[DirRep$ContactZone == 0,]$ClosestInvInvBeforeSecondDir.SecondGap,DirRep[DirRep$ContactZone == 1,]$ClosestInvInvBeforeSecondDir.SecondGap, outline = FALSE, notch = TRUE, ylab = 'SecondGap', names = c('OutContZone','InContZone'))
+# violinplot - alinaplot
+
 
 # why? density of inverted repeats is higher?
-
+#
 plot(InvRep$first_start,InvRep$second_start, main = 'InvRep')
 library(MASS)
 
