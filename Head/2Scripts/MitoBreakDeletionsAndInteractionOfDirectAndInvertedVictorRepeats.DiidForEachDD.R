@@ -126,6 +126,7 @@ DirRep = DirRep[!is.na(DirRep$ClosestInvFirstGap),]
 ## how to understand - which window to take? run opposite test and associate each deletion with repeats => majority of deletions should be associated with repeats.
 
 DirRep = DirRep[DirRep$DistanceBetweenDD > 2000,]
+
 ### 7: statistics
 # A Logistic regression - a probability to have a deletion as a function of FirstGap, SecondGap and NumberOfTheClosestIi
 
@@ -190,6 +191,7 @@ boxplot(DirRep[DirRep$ContactZone == 0,]$ClosestInvTwoGapsTogether,DirRep[DirRep
 
 ### Contact zone only: 
 DirRep = DirRep[DirRep$ContactZone == 1,] # just 490, fuck
+
 
 a = glm(DirRep$PresenceOfDeletion ~ scale(DirRep$ClosestInvFirstGap) + scale(DirRep$ClosestInvSecondGap), family = "poisson")
 summary(a)

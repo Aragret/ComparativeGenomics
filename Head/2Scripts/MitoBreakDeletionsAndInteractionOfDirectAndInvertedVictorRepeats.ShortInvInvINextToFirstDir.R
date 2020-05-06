@@ -213,19 +213,55 @@ summary(glm(DirRep$PresenceOfDeletion ~ (scale(DirRep$ClosestInvInvAfterFirstDir
 # scale(DirRep$ClosestInvInvAfterFirstDir.FirstGap):scale(DirRep$ContactZone)     0.54459    0.16860   3.230 0.001237 ** 
 # scale(DirRep$ClosestInvInvBeforeSecondDir.SecondGap):scale(DirRep$ContactZone)  0.32634    0.10320   3.162 0.001566 ** 
 
-# In contact zone Gaps are shorter:
+##### boxplots:
+
+### Gaps as a function of the presence of deletions
+
+nrow(DirRep[DirRep$PresenceOfDeletionDummy == 1,]) # 215
+nrow(DirRep[DirRep$PresenceOfDeletionDummy == 0,]) # 2535
+nrow(DirRep) # 2750
+
+par(mfrow=c(3,1))
+boxplot(
+DirRep[DirRep$PresenceOfDeletionDummy == 1,]$ClosestInvInvAfterFirstDir.FirstGap,
+DirRep[DirRep$PresenceOfDeletionDummy == 1,]$ClosestInvInvBeforeSecondDir.SecondGap,
+DirRep[DirRep$PresenceOfDeletionDummy == 0,]$ClosestInvInvAfterFirstDir.FirstGap,
+DirRep[DirRep$PresenceOfDeletionDummy == 0,]$ClosestInvInvBeforeSecondDir.SecondGap,
+DirRep$ClosestInvInvAfterFirstDir.FirstGap,
+DirRep$ClosestInvInvBeforeSecondDir.SecondGap,
+outline = FALSE, notch = TRUE, ylab = 'Gaps', names = c('ProxGap.Del','DistGap.Del','ProxGap.NoDel','DistGap.NoDel','ProxGap.All','DistalGap.All'), col = c('dark gray','light gray','dark gray','light gray','dark gray','light gray'), main = 'major arc', ylim=c(0,150))
+
+### Gaps as a function of contact zone
+
 wilcox.test(DirRep[DirRep$ContactZone == 0,]$ClosestInvInvAfterFirstDir.FirstGap,DirRep[DirRep$ContactZone == 1,]$ClosestInvInvAfterFirstDir.FirstGap)
 t.test(DirRep[DirRep$ContactZone == 0,]$ClosestInvInvAfterFirstDir.FirstGap,DirRep[DirRep$ContactZone == 1,]$ClosestInvInvAfterFirstDir.FirstGap)
-boxplot(DirRep[DirRep$ContactZone == 0,]$ClosestInvInvAfterFirstDir.FirstGap,DirRep[DirRep$ContactZone == 1,]$ClosestInvInvAfterFirstDir.FirstGap, outline = FALSE, notch = TRUE, ylab = 'FirstGap', names = c('OutContZone','InContZone'))
-length(DirRep[DirRep$ContactZone == 0,]$ClosestInvInvAfterFirstDir.FirstGap)
-length(DirRep[DirRep$ContactZone == 1,]$ClosestInvInvAfterFirstDir.FirstGap)
-# violinplot - alinaplot
 
 wilcox.test(DirRep[DirRep$ContactZone == 0,]$ClosestInvInvBeforeSecondDir.SecondGap,DirRep[DirRep$ContactZone == 1,]$ClosestInvInvBeforeSecondDir.SecondGap)
 t.test(DirRep[DirRep$ContactZone == 0,]$ClosestInvInvBeforeSecondDir.SecondGap,DirRep[DirRep$ContactZone == 1,]$ClosestInvInvBeforeSecondDir.SecondGap)
-boxplot(DirRep[DirRep$ContactZone == 0,]$ClosestInvInvBeforeSecondDir.SecondGap,DirRep[DirRep$ContactZone == 1,]$ClosestInvInvBeforeSecondDir.SecondGap, outline = FALSE, notch = TRUE, ylab = 'SecondGap', names = c('OutContZone','InContZone'))
-# violinplot - alinaplot
 
+nrow(DirRep[DirRep$ContactZone == 1,]) # 490
+nrow(DirRep[DirRep$ContactZone == 0,]) # 2260
+
+boxplot(
+DirRep[DirRep$PresenceOfDeletionDummy == 1 & DirRep$ContactZone == 1,]$ClosestInvInvAfterFirstDir.FirstGap,
+DirRep[DirRep$PresenceOfDeletionDummy == 1 & DirRep$ContactZone == 1,]$ClosestInvInvBeforeSecondDir.SecondGap,
+DirRep[DirRep$PresenceOfDeletionDummy == 0 & DirRep$ContactZone == 1,]$ClosestInvInvAfterFirstDir.FirstGap,
+DirRep[DirRep$PresenceOfDeletionDummy == 0 & DirRep$ContactZone == 1,]$ClosestInvInvBeforeSecondDir.SecondGap,
+DirRep[DirRep$ContactZone == 1,]$ClosestInvInvAfterFirstDir.FirstGap,
+DirRep[DirRep$ContactZone == 1,]$ClosestInvInvBeforeSecondDir.SecondGap,
+outline = FALSE, notch = TRUE, ylab = 'Gaps', names = c('ProxGap.Del','DistGap.Del','ProxGap.NoDel','DistGap.NoDel','ProxGap.All','DistalGap.All'), col = c('dark gray','light gray','dark gray','light gray','dark gray','light gray'), main = 'potential contact zone', ylim=c(0,150))
+
+
+boxplot(
+DirRep[DirRep$PresenceOfDeletionDummy == 1 & DirRep$ContactZone == 0,]$ClosestInvInvAfterFirstDir.FirstGap,
+DirRep[DirRep$PresenceOfDeletionDummy == 1 & DirRep$ContactZone == 0,]$ClosestInvInvBeforeSecondDir.SecondGap,
+DirRep[DirRep$PresenceOfDeletionDummy == 0 & DirRep$ContactZone == 0,]$ClosestInvInvAfterFirstDir.FirstGap,
+DirRep[DirRep$PresenceOfDeletionDummy == 0 & DirRep$ContactZone == 0,]$ClosestInvInvBeforeSecondDir.SecondGap,
+DirRep[DirRep$ContactZone == 0,]$ClosestInvInvAfterFirstDir.FirstGap,
+DirRep[DirRep$ContactZone == 0,]$ClosestInvInvBeforeSecondDir.SecondGap,
+outline = FALSE, notch = TRUE, ylab = 'Gaps', names = c('ProxGap.Del','DistGap.Del','ProxGap.NoDel','DistGap.NoDel','ProxGap.All','DistalGap.All'), col = c('dark gray','light gray','dark gray','light gray','dark gray','light gray'), main = 'outside the potential contact zone', ylim=c(0,150))
+
+par(mfrow=c(1,1))
 
 # why? density of inverted repeats is higher?
 #
@@ -247,8 +283,6 @@ image(kde,xlim=c(6000,16500), ylim=c(6000,16500), main = 'MirrRep')
 ### extra 1. DIID can be extended to DIIIID
 
 ### extra 2. CONTACT ZONE AS AN OVERLAP OF DISTRIBUTION OF DIRECT AND INVERTED REPEATS
-
-### extra 3. PotentSupplTableForPaper
 
 dev.off()
 
