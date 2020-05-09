@@ -178,6 +178,32 @@ summary(DirRep$ClosestInvInvBeforeSecondDir.SecondGap)# 54-10
 
 ## how to understand - which window to take to associate repeats with deletions? run opposite test and associate each deletion with repeats => majority of deletions should be associated with repeats.
 
+### 6.5: plot
+# DirRep$PresenceOfDeletion - size of the circle
+# Contact zone -  red
+
+
+plot(log2(DirRep$ClosestInvInvAfterFirstDir.FirstGap),log2(DirRep$ClosestInvInvBeforeSecondDir.SecondGap), pch = 16, col = rgb(0.1,0.1,0.1,0.05), xlab = 'proximal gap', ylab = 'distal gap', xlim = c(0,9), ylim = c(0,9)); par(new=TRUE); 
+plot(log2(DirRep[DirRep$PresenceOfDeletion > 0,]$ClosestInvInvAfterFirstDir.FirstGap),log2(DirRep[DirRep$PresenceOfDeletion > 0,]$ClosestInvInvBeforeSecondDir.SecondGap), pch = 16, cex = 0.5, col = 'red', xlim = c(0,9), ylim = c(0,9), xlab = 'proximal gap', ylab = 'distal gap'); 
+
+plot(DirRep$first_start,DirRep$second_start, pch = '', col = rgb(0.1,0.1,0.1,0.05), xlab = 'proximal gap', ylab = 'distal gap', xlim = c(6000,16500), ylim=c(16500,6000)); par(new=TRUE); 
+symbols(DirRep$first_start,DirRep$second_start, circles = (DirRep$ClosestInvInvAfterFirstDir.FirstGap/2000), xlim = c(6000,16500), ylim=c(16500,6000), fg =rgb(0.1,0.1,0.1,0.1), xlab = 'proximal gap', ylab = 'distal gap')
+
+plot(DirRep$first_start,DirRep$second_start, pch = '', xlab = 'start', ylab = 'end', xlim = c(6000,16500), ylim=c(16500,6000)); par(new=TRUE); 
+DirRep$Col = '';
+for (i in 1:nrow(DirRep))
+{
+  if (DirRep$PresenceOfDeletion[i] == 0) {DirRep$Col[i] = rgb(0.1,0.1,0.1,0.1)}
+  if (DirRep$PresenceOfDeletion[i] >  0) {DirRep$Col[i] = rgb(0.5,0.0,0.0,0.5)}
+}
+symbols(DirRep$first_start,DirRep$second_start, circles = (DirRep$ClosestInvInvAfterFirstDir.FirstGap), cex = 0.5, xlim = c(6000,16500), ylim=c(16500,6000), fg = DirRep$Col, xlab = 'start', ylab = 'end', add = TRUE);# par(new=TRUE)
+
+
+length(log2(DirRep[DirRep$PresenceOfDeletion > 0,]$ClosestInvInvAfterFirstDir.FirstGap + 0.001))
+summary(log2(DirRep[DirRep$PresenceOfDeletion > 0,]$ClosestInvInvAfterFirstDir.FirstGap + 0.001))
+length(log2(DirRep[DirRep$PresenceOfDeletion > 0,]$ClosestInvInvBeforeSecondDir.SecondGap + 0.001))
+summary(log2(DirRep[DirRep$PresenceOfDeletion > 0,]$ClosestInvInvBeforeSecondDir.SecondGap + 0.001))
+
 ### 7: statistics
 # A 
 # inverted should be close to the first Dir
