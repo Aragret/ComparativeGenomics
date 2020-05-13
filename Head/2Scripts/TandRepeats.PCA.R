@@ -1,11 +1,16 @@
 
 reps = read.table('../../Body/3Results/TandRepInfo.txt', header = TRUE, sep='\t')
 
-MATRIX = as.matrix(reps[, c('CopyNumber', 'PercentMatches', 'FullLength', 'ConsensusLength',
-                            'fr_A_cons', 'fr_T_cons', 'fr_G_cons', 'fr_C_cons',
-                            'fr_A_repeat', 'fr_T_repeat', 'fr_G_repeat', 'fr_C_repeat')])
+agg = aggregate(reps$Number, by=list(reps$Species), sum)
+names(agg) = c('Species', 'RepeatsNumber')
 
-row.names(MATRIX) = reps$Species
+data = merge(reps, agg, by='Species', all.x = TRUE)
+
+MATRIX = as.matrix(data[, c('CopyNumber', 'PercentMatches', 'FullLength', 'ConsensusLength',
+                            'fr_A_cons', 'fr_T_cons', 'fr_G_cons', 'fr_C_cons',
+                            'fr_A_repeat', 'fr_T_repeat', 'fr_G_repeat', 'fr_C_repeat', 'RepeatsNumber')])
+
+row.names(MATRIX) = data$Species
 
 MATRIX = scale(MATRIX)
 
@@ -31,3 +36,9 @@ plot(MATRIX$Pca3, MATRIX$Pca4)
 
 
 dev.off()
+
+to_save = data[, c('CopyNumber', 'PercentMatches', 'FullLength', 'ConsensusLength',
+                   'fr_A_cons', 'fr_T_cons', 'fr_G_cons', 'fr_C_cons',
+                   'fr_A_repeat', 'fr_T_repeat', 'fr_G_repeat', 'fr_C_repeat', 'RepeatsNumber')]
+
+write.csv(to_save, '../../Body/3Results/TandRepInfoShort.csv', row.names = FALSE, quote = FALSE)
