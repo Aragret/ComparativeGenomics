@@ -1,4 +1,4 @@
-rm(list=ls(all=TRUE))
+rm(list=ls(all=TRUE)) # 19 May 2020
 
 pdf("../../Body/4Figures/MitoBreakDeletionsAndInteractionOfDirectAndInvertedVictorRepeats.DiidForEachDD.R01.pdf")
   
@@ -93,6 +93,7 @@ InvRepSorted = InvRep[order(InvRep$length),]
   
 summary(DirRep$ClosestInvFirstGap)
 summary(DirRep$ClosestInvSecondGap)
+summary(DirRep$ClosestInvTwoGapsTogether) # this is expected to be the most naive metric
 
 ## 5: derive control zone - make it as in falkenberg!
 
@@ -105,7 +106,7 @@ for (i in 1:nrow(DirRep))
 table(DirRep$ContactZone)
 
 ## 6: derive PresenceOfDeletion for each direct repeat:
-Distance2 = 20 # 5+loop
+Distance2 = 40 # 5+loop
 DirRep$PresenceOfDeletion = 0
 DirRep$PresenceOfDeletionDummy = 0
 for (i in 1:nrow(DirRep))
@@ -128,6 +129,28 @@ DirRep = DirRep[!is.na(DirRep$ClosestInvFirstGap),]
 DirRep = DirRep[DirRep$DistanceBetweenDD > 2000,]
 
 ### 7: statistics
+### if the minimal sum of two gaps is important for deletions?
+
+cor.test(DirRep$PresenceOfDeletion,DirRep$ClosestInvTwoGapsTogether, method = 'spearman')
+plot(DirRep$PresenceOfDeletion,DirRep$ClosestInvTwoGapsTogether, col = rgb(0.1,0.1,0.1,0.5)) # dev.off()
+plot(DirRep[DirRep$ContactZone == 1,]$PresenceOfDeletion,DirRep[DirRep$ContactZone == 1,]$ClosestInvTwoGapsTogether, col = rgb(0.1,0.1,0.1,0.5)) # dev.off()
+
+
+
+summary(DirRep[DirRep$ClosestInvTwoGapsTogether < 100,]$PresenceOfDeletion)
+summary(DirRep[DirRep$ClosestInvTwoGapsTogether < 200,]$PresenceOfDeletion)
+summary(DirRep[DirRep$ClosestInvTwoGapsTogether < 300,]$PresenceOfDeletion)
+summary(DirRep[DirRep$ClosestInvTwoGapsTogether < 500,]$PresenceOfDeletion)
+summary(DirRep[DirRep$ClosestInvTwoGapsTogether < 1000,]$PresenceOfDeletion)
+summary(DirRep[DirRep$ClosestInvTwoGapsTogether < 1500,]$PresenceOfDeletion)
+
+(DirRep$ClosestInvFirstGap<)$PresenceOfDeletion
+
+summary(glm(DirRep$PresenceOfDeletion ~ DirRep$ClosestInvTwoGapsTogether, family = poisson))
+summary(glm(DirRep[DirRep$ContactZone == 1,]$PresenceOfDeletion ~ DirRep[DirRep$ContactZone == 1,]$ClosestInvTwoGapsTogether, family = poisson))
+summary(glm(DirRep[DirRep$ContactZone == 1,]$PresenceOfDeletion ~ DirRep[DirRep$ContactZone == 1,]$ClosestInvFirstGap, family = poisson))
+
+
 # A Logistic regression - a probability to have a deletion as a function of FirstGap, SecondGap and NumberOfTheClosestIi
 
 a = glm(DirRep$PresenceOfDeletionDummy ~ DirRep$ClosestInvFirstGap + DirRep$ClosestInvSecondGap + DirRep$NumberOfTheClosestIi + DirRep$DistanceBetweenDD, family = binomial)
