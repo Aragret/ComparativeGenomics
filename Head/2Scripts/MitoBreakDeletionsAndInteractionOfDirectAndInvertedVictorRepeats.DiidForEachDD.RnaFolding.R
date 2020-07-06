@@ -93,4 +93,5 @@ table(DirRep$PresenceOfDeletion)
 summary(glm(DirRep$PresenceOfDeletion ~ DirRep$AbsGibbsEnergy, family = "poisson"))
 
 # NEXT!!!!!!!!!     DO NOT STICK TO DIRECT REPEATS ONLY - WALK THE WHOLE MAJOR ARC WITH 10 BP STEPS AND ESTIMATE  InvInv Gibbs Energy (probability of replication pausing)
+# (16569 - 5782)/10 1000*1000/2
 # NEXT!!!!!!!!!     DO NOT STICK TO DIRECT REPEATS ONLY - WALK THE WHOLE MAJOR ARC WITH 10 BP STEPS AND ESTIMATE  homology of direct (probability to realign)
