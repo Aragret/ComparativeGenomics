@@ -125,7 +125,7 @@ summary(InvInvFoldings$InvInvGibbsEnergy)
 InvInvFoldings$InvInvAbsGibbsEnergy = -1*InvInvFoldings$InvInvGibbsEnergy
 summary(InvInvFoldings$InvInvAbsGibbsEnergy)
 
-write.table(InvInvFoldings, "../../Body/2Derived/InvInvFoldings.Complement1_100bp.x10.Complement2_100bp.txt")
+write.table(InvInvFoldings, "../../Body/2Derived/InvInvFoldings.Complement1_100bp.100bp.Complement2_100bp.txt")
 
 ## add contact zone info
 InvInvFoldings$ContactZone = 0
