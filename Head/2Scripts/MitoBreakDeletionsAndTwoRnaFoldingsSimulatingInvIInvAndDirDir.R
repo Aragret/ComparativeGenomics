@@ -6,7 +6,7 @@ library(dplyr)
 #### 2: read RnaFolding results, reflecting Gibbs Energy of folding of two dir repeats (100 bp windows) and add contact zone in the file
 #### 3. See if DirDirAbsGibbsEnergy explains the presence of deletions in the corresponding window (Logistic or Poisson regression)
 #### 4. read RnaFolding results, reflecting Gibbs Energy of folding of two inv repeats (100 bp windows), write down the file
-#### 5 . GQUADRUPLEXES CAN WORK AS REPLICATION-PAUSING AGENTS AND/OR HIGH STABILITY DUPLEXES
+#### 5 .GQUADRUPLEXES CAN WORK AS REPLICATION-PAUSING AGENTS AND/OR HIGH STABILITY DUPLEXES
 
 pdf("../../Body/4Figures/MitoBreakDeletionsAndTwoRnaFoldingsSimulatingInvIInvAndDirDir.R.pdf", width = 20,height = 20)
 par(mfrow=c(2,2))  
@@ -53,12 +53,6 @@ for (i in 1:nrow(DirDirFoldings))
 }
 table(DirDirFoldings$ContactZone)
 
-# within the contact zone DirDirAbsGibbsEnergy is a bit higher:
-summary(DirDirFoldings[DirDirFoldings$ContactZone == 0,]$DirDirAbsGibbsEnergy)
-summary(DirDirFoldings[DirDirFoldings$ContactZone == 1,]$DirDirAbsGibbsEnergy)
-wilcox.test(DirDirFoldings[DirDirFoldings$ContactZone == 0,]$DirDirAbsGibbsEnergy,DirDirFoldings[DirDirFoldings$ContactZone == 1,]$DirDirAbsGibbsEnergy)
-t.test(DirDirFoldings[DirDirFoldings$ContactZone == 0,]$DirDirAbsGibbsEnergy,DirDirFoldings[DirDirFoldings$ContactZone == 1,]$DirDirAbsGibbsEnergy)
-
 ##### 3. See if DirDirAbsGibbsEnergy explains the presence of deletions in the corresponding window (Logistic or Poisson regression)
 # walk along each line of the DirDirFoldings and check - how many deletions in the corresponding window
 DirDirFoldings$NumbOfDeletions = 0
@@ -76,20 +70,19 @@ summary(DirDirFoldings[DirDirFoldings$NumbOfDeletions > 0,]$NumbOfDeletions)
 table(DirDirFoldings$DummyDeletions)
 
 cor.test(DirDirFoldings$DirDirAbsGibbsEnergy,DirDirFoldings$NumbOfDeletions, method = 'spearman') # positive
-cor.test(DirDirFoldings$DirDirAbsGibbsEnergy,DirDirFoldings$DummyDeletions, method = 'spearman') # positive
+cor.test(DirDirFoldings$DirDirAbsGibbsEnergy,DirDirFoldings$DummyDeletions, method = 'spearman') # positive !!!!! PAPER
 
 summary(glm(DirDirFoldings$NumbOfDeletions ~ DirDirFoldings$DirDirAbsGibbsEnergy, family = poisson())) # weak
-summary(glm(DirDirFoldings$DummyDeletions ~ DirDirFoldings$DirDirAbsGibbsEnergy, family = binomial())) # good
+summary(glm(DirDirFoldings$DummyDeletions ~ DirDirFoldings$DirDirAbsGibbsEnergy, family = binomial())) # good!!!!! == TIG 2010 PAPER
 
 ## the final correlation to digest:
-summary(glm(DirDirFoldings$DummyDeletions ~ scale(DirDirFoldings$DirDirAbsGibbsEnergy) + scale(DirDirFoldings$ContactZone), family = binomial())) # good
+summary(glm(DirDirFoldings$DummyDeletions ~ scale(DirDirFoldings$DirDirAbsGibbsEnergy) + scale(DirDirFoldings$ContactZone), family = binomial())) # good!!!!!
 
-# other correlations:
-summary(glm(DirDirFoldings$NumbOfDeletions ~ scale(DirDirFoldings$DirDirAbsGibbsEnergy) + scale(DirDirFoldings$ContactZone), family = poisson())) # weak
-summary(glm(DirDirFoldings$DummyDeletions ~ scale(DirDirFoldings$DirDirAbsGibbsEnergy)*scale(DirDirFoldings$ContactZone), family = binomial())) # good
-summary(glm(DirDirFoldings[DirDirFoldings$ContactZone == 1,]$DummyDeletions ~ DirDirFoldings[DirDirFoldings$ContactZone == 1,]$DirDirAbsGibbsEnergy, family = binomial())) # with Khrapko we used similar (more broad still...) dataset and results were significant  - do I need to play with different subsets of deletions - Falkenberg's data????
+## other correlations:
+summary(glm(DirDirFoldings[DirDirFoldings$ContactZone == 1,]$DummyDeletions ~ DirDirFoldings[DirDirFoldings$ContactZone == 1,]$DirDirAbsGibbsEnergy, family = binomial())) 
+# with Khrapko we used similar (more broad still...) dataset and results were significant  - do I need to play with different subsets of deletions - Falkenberg's data????
 
-### why poisson regression describes data poorer than binomial?????!!!!!!!
+### why poisson regression describes data poorer than binomial?????!!!!!!! Because data are not really Poisson - distirbuted!!!! better logistic regression
 boxplot(DirDirFoldings[DirDirFoldings$DummyDeletions == 0,]$DirDirAbsGibbsEnergy,DirDirFoldings[DirDirFoldings$DummyDeletions == 1,]$DirDirAbsGibbsEnergy, names=c('0','>0'), notch = TRUE)
 boxplot(DirDirFoldings[DirDirFoldings$NumbOfDeletions == 0,]$DirDirAbsGibbsEnergy,DirDirFoldings[DirDirFoldings$NumbOfDeletions == 1,]$DirDirAbsGibbsEnergy, DirDirFoldings[DirDirFoldings$NumbOfDeletions == 2,]$DirDirAbsGibbsEnergy, DirDirFoldings[DirDirFoldings$NumbOfDeletions > 2,]$DirDirAbsGibbsEnergy, names=c('0','1','2','>2'), notch = TRUE, outline = FALSE, varwidth =  TRUE)
 
@@ -136,12 +129,6 @@ for (i in 1:nrow(InvInvFoldings))
 }
 table(InvInvFoldings$ContactZone)
 
-# within the contact zone InvInvAbsGibbsEnergy is a bit higher (not significant):
-summary(InvInvFoldings[DirDirFoldings$ContactZone == 0,]$InvInvAbsGibbsEnergy)
-summary(InvInvFoldings[DirDirFoldings$ContactZone == 1,]$InvInvAbsGibbsEnergy)
-wilcox.test(InvInvFoldings[DirDirFoldings$ContactZone == 0,]$InvInvAbsGibbsEnergy,InvInvFoldings[InvInvFoldings$ContactZone == 1,]$InvInvAbsGibbsEnergy)
-t.test(InvInvFoldings[InvInvFoldings$ContactZone == 0,]$InvInvAbsGibbsEnergy,InvInvFoldings[InvInvFoldings$ContactZone == 1,]$InvInvAbsGibbsEnergy)
-
 # test if InvInv directly associated with deletions:
 InvInvFoldings$NumbOfDeletions = 0
 InvInvFoldings$DummyDeletions = 0
@@ -177,8 +164,8 @@ summary(glm(InvInvFoldings[InvInvFoldings$ContactZone == 0,]$DummyDeletions ~ In
 ###### MERGE
 ## to merge InvInv with DirDir I need to make a shift - to assure that InvInv will be nested within DirDir
 InvInvFoldings = select(InvInvFoldings,Win1,Win2,InvInvAbsGibbsEnergy)
-InvInvFoldings$Win1 = InvInvFoldings$Win1-100 # allign with DirDir windows:
-InvInvFoldings$Win2 = InvInvFoldings$Win2+100
+InvInvFoldings$Win1 = InvInvFoldings$Win1-100 # allign with DirDir windows: start decrease
+InvInvFoldings$Win2 = InvInvFoldings$Win2+100  # end increase 
 
 DirDirFoldings = merge(DirDirFoldings,InvInvFoldings, by = c('Win1','Win2'))
 
@@ -190,9 +177,9 @@ summary(glm(DirDirFoldings$NumbOfDeletions ~ scale(DirDirFoldings$DirDirAbsGibbs
 summary(glm(DirDirFoldings$NumbOfDeletions ~ scale(DirDirFoldings$DirDirAbsGibbsEnergy)*scale(DirDirFoldings$InvInvAbsGibbsEnergy), family = poisson())) # three are significant - interaction is negative and very significant!!!
 
 ### DirDir and InvInv stabilities negatively correlate with each other (result of negative selection???) in the whole major arc, in contact zone and outside the contact zone:
-cor.test(DirDirFoldings$DirDirAbsGibbsEnergy,DirDirFoldings$InvInvAbsGibbsEnergy, method = 'spearman') # negative strong!!
+cor.test(DirDirFoldings$DirDirAbsGibbsEnergy,DirDirFoldings$InvInvAbsGibbsEnergy, method = 'spearman') # negative strong!! PAPER
 plot(log2(DirDirFoldings$DirDirAbsGibbsEnergy+1),log2(DirDirFoldings$InvInvAbsGibbsEnergy+1))
-cor.test(DirDirFoldings[DirDirFoldings$ContactZone == 1,]$DirDirAbsGibbsEnergy,DirDirFoldings[DirDirFoldings$ContactZone == 1,]$InvInvAbsGibbsEnergy, method = 'spearman') # negative strong!!
+cor.test(DirDirFoldings[DirDirFoldings$ContactZone == 1,]$DirDirAbsGibbsEnergy,DirDirFoldings[DirDirFoldings$ContactZone == 1,]$InvInvAbsGibbsEnergy, method = 'spearman') # negative
 plot(log2(DirDirFoldings[DirDirFoldings$ContactZone == 1,]$DirDirAbsGibbsEnergy+1),log2(DirDirFoldings[DirDirFoldings$ContactZone == 1,]$InvInvAbsGibbsEnergy+1))
 cor.test(DirDirFoldings[DirDirFoldings$ContactZone == 0,]$DirDirAbsGibbsEnergy,DirDirFoldings[DirDirFoldings$ContactZone == 0,]$InvInvAbsGibbsEnergy, method = 'spearman') # negative strong!!
 plot(log2(DirDirFoldings[DirDirFoldings$ContactZone == 0,]$DirDirAbsGibbsEnergy+1),log2(DirDirFoldings[DirDirFoldings$ContactZone == 0,]$InvInvAbsGibbsEnergy+1))
@@ -287,8 +274,8 @@ wilcox.test(GqVsLocation[(GqVsLocation$Win >= 6000 & GqVsLocation$Win <= 9000) |
 wilcox.test(GqVsLocation[(GqVsLocation$Win >= 6000 & GqVsLocation$Win <= 9000) | (GqVsLocation$Win >= 13000 & GqVsLocation$Win <= 16000),]$WinGQMaxScore,GqVsLocation[GqVsLocation$Win >= 9000 & GqVsLocation$Win < 13000,]$WinGQMaxScore)
 
 ### IF GQ PER SE ARE ASSOCIATED WITH DELETIONS: ONLY THE START OF DELETIONS (WIN1) STRONGLY DEPENDS ON GQ: ASYMMETRY -> FALKENBERG IS RIGHT
-summary(glm(NumbOfDeletions ~ scale(Win1GQOverlap) + scale(Win2GQOverlap), family = poisson(), data = DirDirFoldings))
-summary(glm(NumbOfDeletions ~ scale(Win1GQOverlap), family = poisson(), data = DirDirFoldings)) # strong positive !!!! AS IF GQ PAUSES REPLICATION
+summary(glm(NumbOfDeletions ~ scale(Win1GQOverlap) + scale(Win2GQOverlap), family = poisson(), data = DirDirFoldings))   # PAPER
+summary(glm(NumbOfDeletions ~ scale(Win1GQOverlap), family = poisson(), data = DirDirFoldings)) # strong positive !!!! AS IF GQ PAUSES REPLICATION  PAPER
 summary(glm(NumbOfDeletions ~ scale(Win2GQOverlap), family = poisson(), data = DirDirFoldings)) # nothing
 
 plot(DirDirFoldings$Win1GQOverlap,DirDirFoldings$NumbOfDeletions)
@@ -362,20 +349,20 @@ mean(breaks$TheClosestGQToDelEnd)
 
 ### GQuadruplexes and Foldings (very positively with DirDirAbsGibbsEnergy and very negatively with InvInvAbsGibbsEnergy):
 # because many GGGG on one side and reversed many CCCC - strong contact of course 
-cor.test(DirDirFoldings$Win1GQOverlap,DirDirFoldings$DirDirAbsGibbsEnergy, method = 'spearman') # very positive
-cor.test(DirDirFoldings$Win2GQOverlap,DirDirFoldings$DirDirAbsGibbsEnergy, method = 'spearman') # super positive
-cor.test((DirDirFoldings$Win1GQOverlap + DirDirFoldings$Win2GQOverlap)/2,DirDirFoldings$DirDirAbsGibbsEnergy, method = 'spearman') # super positive
+cor.test(DirDirFoldings$Win1GQOverlap,DirDirFoldings$DirDirAbsGibbsEnergy, method = 'spearman') # very positive  PAPER
+cor.test(DirDirFoldings$Win2GQOverlap,DirDirFoldings$DirDirAbsGibbsEnergy, method = 'spearman') # super positive PAPER
+cor.test((DirDirFoldings$Win1GQOverlap + DirDirFoldings$Win2GQOverlap)/2,DirDirFoldings$DirDirAbsGibbsEnergy, method = 'spearman') # super positive PAPER
 cor.test((DirDirFoldings$Win1GQAverageScore + DirDirFoldings$Win1GQAverageScore)/2,DirDirFoldings$DirDirAbsGibbsEnergy, method = 'spearman') # super positive
 cor.test((DirDirFoldings$Win1GQMaxScore + DirDirFoldings$Win1GQMaxScore)/2,DirDirFoldings$DirDirAbsGibbsEnergy, method = 'spearman') # super positive
 
 ## DirDirFoldings$InvInvAbsGibbsEnergy negatively correlates to GQuadruplexes:
 # because GQ are not inverted repeats
-cor.test(DirDirFoldings$Win1GQOverlap,DirDirFoldings$InvInvAbsGibbsEnergy, method = 'spearman') # very negative
-cor.test(DirDirFoldings$Win2GQOverlap,DirDirFoldings$InvInvAbsGibbsEnergy, method = 'spearman') # very negative
+cor.test(DirDirFoldings$Win1GQOverlap,DirDirFoldings$InvInvAbsGibbsEnergy, method = 'spearman') # very negative PAPER
+cor.test(DirDirFoldings$Win2GQOverlap,DirDirFoldings$InvInvAbsGibbsEnergy, method = 'spearman') # very negative PAPER
 
 # distribution of GQuadruplexes explains negative correlation between DirDir and InvInv? YES, IT IS!!!!!!!
-summary(glm(Win1GQOverlap ~ scale(DirDirAbsGibbsEnergy) + scale(InvInvAbsGibbsEnergy), family = poisson(), data = DirDirFoldings))
-summary(glm(Win2GQOverlap ~ scale(DirDirAbsGibbsEnergy) + scale(InvInvAbsGibbsEnergy), family = poisson(), data = DirDirFoldings))
+summary(glm(Win1GQOverlap ~ scale(DirDirAbsGibbsEnergy) + scale(InvInvAbsGibbsEnergy), family = poisson(), data = DirDirFoldings)) # PAPER
+summary(glm(Win2GQOverlap ~ scale(DirDirAbsGibbsEnergy) + scale(InvInvAbsGibbsEnergy), family = poisson(), data = DirDirFoldings)) # PAPER
 
 # very high AIC => plot it somehow
 DirDirFoldings$Win12GQOverlap = (DirDirFoldings$Win1GQOverlap + DirDirFoldings$Win2GQOverlap)/2
@@ -388,23 +375,30 @@ plot(DirDirFoldings$Win12GQOverlap,DirDirFoldings$InvInvAbsGibbsEnergy)
 
 dev.off()
 
-
-
 # put altogether:
 # the best result: Win1GQOverlap correlates with DirDirAbsGibbsEnergy 
 # => should we interpret GQ as high GibbsEnergy of direct repeats or as pausing of replication only at first window!!!!!?????
-summary(glm(log2(NumbOfDeletions+1) ~ log2(Win1GQOverlap+1) + log2(Win2GQOverlap+1), family = poisson(), data = DirDirFoldings))
-summary(glm(log2(NumbOfDeletions+1) ~ log2(Win1GQOverlap+1) + log2(InvInvAbsGibbsEnergy+1) + log2(DirDirAbsGibbsEnergy+1), family = poisson(), data = DirDirFoldings))
-summary(glm(log2(NumbOfDeletions+1) ~ log2(Win1GQOverlap+1) + log2(InvInvAbsGibbsEnergy+1)*log2(DirDirAbsGibbsEnergy+1), family = poisson(), data = DirDirFoldings))
+summary(glm(log2(NumbOfDeletions+1) ~ log2(Win1GQOverlap+1) + log2(Win2GQOverlap+1), family = poisson(), data = DirDirFoldings))  # PAPER
+summary(glm(log2(NumbOfDeletions+1) ~ log2(Win1GQOverlap+1) + log2(InvInvAbsGibbsEnergy+1) + log2(DirDirAbsGibbsEnergy+1), family = poisson(), data = DirDirFoldings)) # so so 
+summary(glm(log2(NumbOfDeletions+1) ~ log2(Win1GQOverlap+1) + log2(InvInvAbsGibbsEnergy+1)*log2(DirDirAbsGibbsEnergy+1), family = poisson(), data = DirDirFoldings)) # so so 
 
 summary(glm(NumbOfDeletions ~ log2(Win1GQOverlap+1) + log2(InvInvAbsGibbsEnergy+1) + log2(DirDirAbsGibbsEnergy+1), family = poisson(), data = DirDirFoldings))
 summary(glm(NumbOfDeletions ~ scale(log2(Win1GQOverlap+1)) + scale(log2(InvInvAbsGibbsEnergy+1))*scale(log2(DirDirAbsGibbsEnergy+1)), family = poisson(), data = DirDirFoldings))
 
+summary(glm(NumbOfDeletions ~ log2(Win1GQOverlap+1) + log2(InvInvAbsGibbsEnergy+1)*log2(DirDirAbsGibbsEnergy+1), family = poisson(), data = DirDirFoldings))  # PAPER
+summary(glm(NumbOfDeletions ~ log2(Win1GQOverlap+1) + ContactZone + log2(InvInvAbsGibbsEnergy+1)*log2(DirDirAbsGibbsEnergy+1), family = poisson(), data = DirDirFoldings))  # PAPER
+
+summary(glm(DummyDeletions ~ log2(Win1GQOverlap+1) + log2(InvInvAbsGibbsEnergy+1)*log2(DirDirAbsGibbsEnergy+1), family = binomial(), data = DirDirFoldings))  # NOTHING GOOD
+
+
+write.table(DirDirFoldings, "../../Body/2Derived/DirDIrFoldings.Reverse1_100bp.x10.Complement2_100bp.txt")
+
+# can we visualize it !!!!!?????
+# why Dummy doesn't work and only NumbOfDel works well?
 # WORKING HYPOTHESIS
 # DirDirAbs ~ +GQ => it makes stability higher!
 # InvInvAbs ~ -GQ => because GQ doesn't interacts with another GQ
-## Dir-GQ-InvInv-Dir ### THE BEST COMBINATION!!!!!
-
+## Dir-GQ-InvInv-Dir ### THE BEST COMBINATION!!!!! => MATTERS ARISING
 
 ###### TO DO:
 ### olivier presentation = add many components just to explain more and more....
